@@ -271,25 +271,41 @@ export async function deleteShipment(id: string): Promise<void> {
 
 // ---------------- Analytics ----------------
 
-export async function getDashboardStats() {
+export type StatsRange = "month" | "3months" | "year" | "all";
+
+function statsCutoff(range: StatsRange): number | null {
+  const now = new Date();
+  if (range === "month") return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  if (range === "3months") return now.setMonth(now.getMonth() - 3);
+  if (range === "year") return now.setFullYear(now.getFullYear() - 1);
+  return null;
+}
+
+export async function getDashboardStats(range: StatsRange = "all") {
   const shipments = await getShipments();
-  const total = shipments.length;
-  const delivered = shipments.filter((s) => s.status === "delivered");
-  const pending = shipments.filter(
+  const cutoff = statsCutoff(range);
+  const inRange = cutoff
+    ? shipments.filter((s) => new Date(s.created_at).getTime() >= cutoff)
+    : shipments;
+  const total = inRange.length;
+  const delivered = inRange.filter((s) => s.status === "delivered");
+  const pending = inRange.filter(
     (s) => !["delivered", "returned"].includes(s.status)
   );
   const revenue = delivered.reduce(
     (acc, s) => acc + (s.cod_amount || 0) + (s.price || 0),
     0
   );
+  const drivers = await getDrivers();
+  const trucks = await getTrucks();
   return {
     total,
     delivered: delivered.length,
     pending: pending.length,
-    returned: shipments.filter((s) => s.status === "returned").length,
-    outForDelivery: shipments.filter((s) => s.status === "out_for_delivery").length,
-    activeDrivers: mockDrivers.filter((d) => d.is_active).length,
-    totalTrucks: mockTrucks.length,
+    returned: inRange.filter((s) => s.status === "returned").length,
+    outForDelivery: inRange.filter((s) => s.status === "out_for_delivery").length,
+    activeDrivers: drivers.filter((d) => d.is_active).length,
+    totalTrucks: trucks.length,
     revenue,
   };
 }
@@ -378,10 +394,14 @@ export async function getAgencyStats(id: string) {
   const totalValue = shipments.reduce((acc, s) => acc + (s.price || 0), 0);
   const collected = delivered.reduce((acc, s) => acc + (s.cod_amount || 0), 0);
   const pendingValue = pending.reduce((acc, s) => acc + (s.cod_amount || 0), 0);
+  const revenueBase = delivered.reduce(
+    (acc, s) => acc + (s.price || 0) + (s.cod_amount || 0),
+    0
+  );
   const agencies = await getAgencies();
   const agency = agencies.find((a) => a.id === id);
   const commissionPercent = agency?.commission_percent ?? 10;
-  const commission = (collected * commissionPercent) / 100;
+  const commission = (revenueBase * commissionPercent) / 100;
   return {
     total: shipments.length,
     delivered: delivered.length,
