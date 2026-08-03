@@ -262,6 +262,7 @@ export default function ShipmentsPage() {
         onChanged={() => {
           queryClient.invalidateQueries({ queryKey: ["shipments"] });
           queryClient.invalidateQueries({ queryKey: ["stats"] });
+          queryClient.invalidateQueries({ queryKey: ["agency-stats"] });
         }}
       />
     </div>
