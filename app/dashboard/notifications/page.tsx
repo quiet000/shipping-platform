@@ -25,10 +25,12 @@ import {
   getShipments,
 } from "@/lib/data/api";
 import { cn, formatDateTime, daysUntil, formatDate } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 import { ALERT_STYLES, ALERT_ICON_COLORS, STATUS_LABELS, type ShipmentStatus } from "@/lib/types";
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [filter, setFilter] = useState("all");
 
   const { data: notifications = [] } = useQuery({
@@ -82,10 +84,12 @@ export default function NotificationsPage() {
             كشف تلقائي للشحنات القريبة من موعد تسليمها (يومان أو أقل)
           </p>
         </div>
-        <Button variant="outline" onClick={() => sla.mutate()} loading={sla.isPending}>
-          <RefreshCcw className="h-4 w-4" />
-          فحص الشحنات الآن
-        </Button>
+        {user?.role === "admin" && (
+          <Button variant="outline" onClick={() => sla.mutate()} loading={sla.isPending}>
+            <RefreshCcw className="h-4 w-4" />
+            فحص الشحنات الآن
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

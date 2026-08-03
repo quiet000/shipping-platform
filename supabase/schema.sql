@@ -147,13 +147,9 @@ CREATE POLICY "shipments_update_assigned_driver" ON shipments
     AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'driver'
   );
 
--- Public tracking: anyone with the waybill number can look up a
--- shipment's status & logs (anonymous, no login required)
-CREATE POLICY "shipments_read_public_track" ON shipments
-  FOR SELECT USING (true);
-
-CREATE POLICY "logs_read_public_track" ON shipment_logs
-  FOR SELECT USING (true);
+-- Public tracking goes through SECURITY DEFINER RPCs (track_shipment /
+-- track_shipment_logs below) so anonymous users can only look up a shipment
+-- by its exact waybill number — they cannot list or enumerate shipments.
 
 -- Agencies: read all, admin manages
 CREATE POLICY "agencies_read_all" ON agencies
@@ -195,7 +191,7 @@ CREATE POLICY "trucks_write_admin" ON trucks
     (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
 
--- Shipment logs: read all, insert staff
+-- Shipment logs: read all, insert staff (drivers can log their own shipments)
 CREATE POLICY "logs_read_all" ON shipment_logs
   FOR SELECT USING (auth.uid() IS NOT NULL);
 
@@ -203,6 +199,83 @@ CREATE POLICY "logs_insert_staff" ON shipment_logs
   FOR INSERT WITH CHECK (
     (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager')
   );
+
+CREATE POLICY "logs_insert_driver_assigned" ON shipment_logs
+  FOR INSERT WITH CHECK (
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'driver'
+    AND EXISTS (
+      SELECT 1 FROM shipments s
+      WHERE s.id = shipment_id
+        AND s.assigned_driver_id = auth.uid()
+    )
+  );
+
+-- ============================================================
+--  Public tracking (anonymous): SECURITY DEFINER RPCs so users
+--  can only fetch a shipment by its exact waybill number.
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.track_shipment(p_waybill text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'id', s.id,
+    'waybill_number', s.waybill_number,
+    'client_name', s.client_name,
+    'client_phone', s.client_phone,
+    'destination_address', s.destination_address,
+    'destination_city', s.destination_city,
+    'shipping_type', s.shipping_type,
+    'status', s.status,
+    'agency_id', s.agency_id,
+    'assigned_driver_id', s.assigned_driver_id,
+    'price', s.price,
+    'cod_amount', s.cod_amount,
+    'expected_delivery_date', s.expected_delivery_date,
+    'created_at', s.created_at,
+    'updated_at', s.updated_at,
+    'agency', CASE WHEN a.name IS NULL THEN NULL ELSE jsonb_build_object('name', a.name) END,
+    'assigned_driver', CASE WHEN p.full_name IS NULL THEN NULL ELSE jsonb_build_object('full_name', p.full_name) END
+  ) INTO v
+  FROM shipments s
+  LEFT JOIN agencies a ON a.id = s.agency_id
+  LEFT JOIN profiles p ON p.id = s.assigned_driver_id
+  WHERE s.waybill_number = p_waybill
+  LIMIT 1;
+  RETURN v;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.track_shipment_logs(p_waybill text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', l.id,
+    'shipment_id', l.shipment_id,
+    'status', l.status,
+    'location_description', l.location_description,
+    'notes', l.notes,
+    'created_by', l.created_by,
+    'created_at', l.created_at
+  ) ORDER BY l.created_at DESC)
+  INTO v
+  FROM shipment_logs l
+  JOIN shipments s ON s.id = l.shipment_id
+  WHERE s.waybill_number = p_waybill;
+  RETURN v;
+END;
+$$;
 
 -- ============================================================
 --  Automation: create SLA notifications for shipments with

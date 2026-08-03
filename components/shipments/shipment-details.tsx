@@ -16,6 +16,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { getShipmentLogs, getShipment, updateShipmentStatus, getDrivers } from "@/lib/data/api";
+import { useAuth } from "@/lib/auth";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import {
   STATUS_LABELS,
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props) {
+  const { can } = useAuth();
   const [updating, setUpdating] = useState(false);
 
   const { data: shipment, refetch: refetchShipment } = useQuery({
@@ -102,25 +104,27 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
           ))}
         </div>
 
-        <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-          <p className="mb-3 text-sm font-black text-slate-700 dark:text-slate-200">
-            تحديث الحالة
-          </p>
-          <Select
-            value={shipment.status}
-            onChange={(e) => changeStatus(e.target.value as ShipmentStatus)}
-            disabled={updating}
-          >
-            {(Object.keys(STATUS_LABELS) as ShipmentStatus[]).map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </Select>
-          <p className="mt-2 text-[11px] text-slate-400">
-            تغيير الحالة يُسجَّل تلقائياً في سجل حركة الشحنة.
-          </p>
-        </div>
+        {can("shipments.update.status") && (
+          <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+            <p className="mb-3 text-sm font-black text-slate-700 dark:text-slate-200">
+              تحديث الحالة
+            </p>
+            <Select
+              value={shipment.status}
+              onChange={(e) => changeStatus(e.target.value as ShipmentStatus)}
+              disabled={updating}
+            >
+              {(Object.keys(STATUS_LABELS) as ShipmentStatus[]).map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </option>
+              ))}
+            </Select>
+            <p className="mt-2 text-[11px] text-slate-400">
+              تغيير الحالة يُسجَّل تلقائياً في سجل حركة الشحنة.
+            </p>
+          </div>
+        )}
 
         <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
           <p className="mb-3 text-sm font-black text-slate-700 dark:text-slate-200">سجل حركة الشحنة</p>

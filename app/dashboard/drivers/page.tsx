@@ -21,7 +21,7 @@ import { Modal } from "@/components/ui/modal";
 import { RoleBadge } from "@/components/ui/badge";
 import {
   getDrivers,
-  createProfile,
+  adminCreateUser,
   updateProfile,
   deleteProfile,
   getTrucks,
@@ -50,7 +50,7 @@ export default function DriversPage() {
   const mutation = useMutation({
     mutationFn: async (input: ProfileInput) => {
       if (editing) await updateProfile(editing.id, input);
-      else await createProfile(input);
+      else await adminCreateUser(input);
     },
     onSuccess: () => {
       toast.success(editing ? "تم تحديث بيانات المندوب" : "تمت إضافة المندوب بنجاح");

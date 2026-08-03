@@ -212,7 +212,7 @@ function TruckForm({
         onSave({
           ...form,
           capacity_tons: Number(form.capacity_tons) || 0,
-          driver_id: form.driver_id || undefined,
+          driver_id: form.driver_id || null,
         });
       }}
       className="space-y-4"
@@ -243,7 +243,7 @@ function TruckForm({
       </div>
       <div>
         <Label>السائق المسند</Label>
-        <Select value={form.driver_id} onChange={(e) => setForm({ ...form, driver_id: e.target.value })}>
+        <Select value={form.driver_id ?? ""} onChange={(e) => setForm({ ...form, driver_id: e.target.value })}>
           <option value="">بدون سائق</option>
           {drivers.map((d) => (
             <option key={d.id} value={d.id}>

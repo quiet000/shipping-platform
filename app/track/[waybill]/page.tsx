@@ -25,7 +25,7 @@ import {
 
 export default function TrackPage() {
   const params = useParams<{ waybill: string }>();
-  const waybill = decodeURIComponent(params.waybill);
+  const waybill = params.waybill;
 
   const [loading, setLoading] = useState(true);
   const [shipment, setShipment] = useState<Shipment | null>(null);
@@ -42,6 +42,7 @@ export default function TrackPage() {
           setShipment(null);
         }
       })
+      .catch(() => setShipment(null))
       .finally(() => setLoading(false));
   }, [waybill]);
 

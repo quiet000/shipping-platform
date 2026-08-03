@@ -34,6 +34,7 @@ import {
   type AgencyInput,
 } from "@/lib/data/api";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 import type { Agency } from "@/lib/types";
 
 const emptyAgency: AgencyInput = {
@@ -47,9 +48,11 @@ const emptyAgency: AgencyInput = {
 
 export default function AgenciesPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Agency | null>(null);
   const [drawerId, setDrawerId] = useState<string | null>(null);
+  const isAdmin = user?.role === "admin";
 
   const { data: agencies = [] } = useQuery({ queryKey: ["agencies"], queryFn: getAgencies });
 
@@ -84,15 +87,17 @@ export default function AgenciesPage() {
             {agencies.length} شركة شريكة في التوزيع
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setModalOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          إضافة وكيل
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            إضافة وكيل
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -115,27 +120,31 @@ export default function AgenciesPage() {
                   <Button variant="ghost" size="icon" onClick={() => setDrawerId(a.id)} title="عرض الإحصائيات">
                     <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setEditing(a);
-                      setModalOpen(true);
-                    }}
-                    title="تعديل"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      if (confirm("هل أنت متأكد من حذف هذه الوكالة؟")) del.mutate(a.id);
-                    }}
-                    title="حذف"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  {isAdmin && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditing(a);
+                          setModalOpen(true);
+                        }}
+                        title="تعديل"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm("هل أنت متأكد من حذف هذه الوكالة؟")) del.mutate(a.id);
+                        }}
+                        title="حذف"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -59,11 +59,17 @@ export type TruckInput = {
   plate_number: string;
   model_type?: string;
   capacity_tons?: number;
-  driver_id?: string;
+  driver_id?: string | null;
   status?: string;
 };
 
 const db = () => createClient();
+
+async function getSessionToken(): Promise<string | null> {
+  if (!hasSupabaseEnv) return null;
+  const { data } = await createClient().auth.getSession();
+  return data.session?.access_token ?? null;
+}
 
 // ---------------- Shipments ----------------
 
@@ -95,26 +101,24 @@ export async function trackShipment(waybill: string): Promise<{
   shipment: Shipment;
   logs: ShipmentLog[];
 } | null> {
+  const q = waybill.trim();
   if (!hasSupabaseEnv) {
     const shipment = mockShipments.find(
-      (s) => s.waybill_number.toLowerCase() === waybill.trim().toLowerCase()
+      (s) => s.waybill_number.toLowerCase() === q.toLowerCase()
     );
     if (!shipment) return null;
     return { shipment, logs: mockLogs[shipment.id] ?? [] };
   }
-  const { data, error } = await db()
-    .from("shipments")
-    .select("*, agency:agencies(name), assigned_driver:profiles(full_name)")
-    .ilike("waybill_number", waybill.trim())
-    .single();
-  if (error || !data) return null;
-  const { data: logs } = await db()
-    .from("shipment_logs")
-    .select("*")
-    .eq("shipment_id", data.id)
-    .order("created_at", { ascending: false });
+  const { data: shipment, error } = await db().rpc("track_shipment", {
+    p_waybill: q,
+  });
+  if (error) throw new Error(error.message);
+  if (!shipment) return null;
+  const { data: logs } = await db().rpc("track_shipment_logs", {
+    p_waybill: q,
+  });
   return {
-    shipment: data as Shipment,
+    shipment: shipment as Shipment,
     logs: (logs as ShipmentLog[]) ?? [],
   };
 }
@@ -237,13 +241,11 @@ export async function updateShipmentStatus(
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  if (notes || true) {
-    await db().from("shipment_logs").insert({
-      shipment_id: id,
-      status,
-      notes: notes ?? "تم تحديث الحالة",
-    });
-  }
+  await db().from("shipment_logs").insert({
+    shipment_id: id,
+    status,
+    notes: notes ?? "تم تحديث الحالة",
+  });
 }
 
 export async function updateShipment(id: string, patch: Partial<Shipment>): Promise<void> {
@@ -456,9 +458,12 @@ export async function adminCreateUser(input: ProfileInput & { password?: string 
   if (!hasSupabaseEnv) {
     return createProfile(input);
   }
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = await getSessionToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch("/api/users", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(input),
   });
   const json = await res.json().catch(() => ({}));
@@ -494,9 +499,12 @@ export async function changePassword(current: string, next: string): Promise<voi
 
 export async function adminResetPassword(id: string, password: string): Promise<void> {
   if (!hasSupabaseEnv) throw new Error("غير متاح في وضع العرض التجريبي");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = await getSessionToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch("/api/users/reset-password", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ id, password }),
   });
   const json = await res.json().catch(() => ({}));

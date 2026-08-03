@@ -67,7 +67,7 @@ export function AddShipmentModal({ open, onClose }: Props) {
     e.preventDefault();
     mutation.mutate({
       ...form,
-      waybill_number: useAutoWaybill ? form.waybill_number : form.waybill_number,
+      waybill_number: form.waybill_number,
       agency_id: form.agency_id || undefined,
       assigned_driver_id: form.assigned_driver_id || undefined,
       price: Number(form.price) || 0,
@@ -91,10 +91,14 @@ export function AddShipmentModal({ open, onClose }: Props) {
               />
               <button
                 type="button"
-                title="توليد رقم تلقائي"
+                title={useAutoWaybill ? "تحرير يدوي" : "توليد رقم تلقائي"}
                 onClick={() => {
-                  setUseAutoWaybill(true);
-                  set("waybill_number", generateWaybillNumber());
+                  if (useAutoWaybill) {
+                    setUseAutoWaybill(false);
+                  } else {
+                    setUseAutoWaybill(true);
+                    set("waybill_number", generateWaybillNumber());
+                  }
                 }}
                 className="flex h-9 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-slate-300 text-amber-500 transition hover:bg-amber-50 dark:border-slate-700 dark:hover:bg-slate-800"
               >

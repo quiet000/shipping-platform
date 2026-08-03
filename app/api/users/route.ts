@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { DEFAULT_PASSWORD } from "@/lib/constants";
+import { getCallerAuth } from "@/lib/api-auth";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -8,6 +9,14 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 export async function POST(request: Request) {
   if (!url || !serviceRoleKey) {
     return NextResponse.json({ error: "Supabase غير مهيّأ على الخادم" }, { status: 500 });
+  }
+
+  const caller = await getCallerAuth(request);
+  if (caller === "unconfigured") {
+    return NextResponse.json({ error: "Supabase غير مهيّأ على الخادم" }, { status: 500 });
+  }
+  if (caller !== "admin") {
+    return NextResponse.json({ error: "غير مصرّح لك" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => ({}));

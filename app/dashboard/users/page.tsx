@@ -403,11 +403,7 @@ function UserModal({
   const togglePerm = (key: string) => {
     setPerms((p) => {
       const next = { ...p };
-      if (key in next && next[key] === true) {
-        delete next[key];
-      } else {
-        next[key] = true;
-      }
+      next[key] = !(p[key] === true);
       return next;
     });
   };
