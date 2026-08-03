@@ -22,15 +22,15 @@ const navItems = [
   {
     section: "الرئيسية",
     items: [
-      { href: "/dashboard", label: "لوحة الإحصائيات", icon: LayoutDashboard, roles: ["admin", "supervisor", "driver", "accountant"] },
-      { href: "/dashboard/notifications", label: "التنبيهات والإنذارات", icon: Bell, roles: ["admin", "supervisor", "driver", "accountant"] },
+      { href: "/dashboard", label: "لوحة الإحصائيات", icon: LayoutDashboard, roles: ["admin", "supervisor", "branch_manager", "driver", "accountant"] },
+      { href: "/dashboard/notifications", label: "التنبيهات والإنذارات", icon: Bell, roles: ["admin", "supervisor", "branch_manager", "driver", "accountant"] },
     ],
   },
   {
     section: "العمليات",
     items: [
-      { href: "/dashboard/shipments", label: "إدارة الشحنات", icon: Package, roles: ["admin", "supervisor", "driver", "accountant"] },
-      { href: "/dashboard/agencies", label: "الوكلاء والشركات", icon: Building2, roles: ["admin", "supervisor", "accountant"] },
+      { href: "/dashboard/shipments", label: "إدارة الشحنات", icon: Package, roles: ["admin", "supervisor", "branch_manager", "driver", "accountant"] },
+      { href: "/dashboard/agencies", label: "الوكلاء والشركات", icon: Building2, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
     ],
   },
   {

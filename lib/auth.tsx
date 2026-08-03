@@ -34,6 +34,15 @@ const PERMISSIONS: Record<UserRole, string[]> = {
     "analytics.view",
     "notifications.view",
   ],
+  branch_manager: [
+    "shipments.view",
+    "shipments.create",
+    "shipments.update",
+    "shipments.update.status",
+    "shipments.bulk",
+    "analytics.view",
+    "notifications.view",
+  ],
   driver: ["shipments.view", "shipments.update.status"],
   accountant: ["shipments.view", "analytics.view", "notifications.view"],
 };

@@ -272,6 +272,7 @@ function DriverForm({
         >
           <option value="driver">سائق / مندوب</option>
           <option value="supervisor">مشرف</option>
+          <option value="branch_manager">مدير فرع</option>
         </Select>
       </div>
       <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">

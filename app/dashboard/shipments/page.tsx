@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, FileSpreadsheet, Search, Eye, Pencil, AlertTriangle } from "lucide-react";
+import { Plus, FileSpreadsheet, Search, Eye, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +13,14 @@ import { AddShipmentModal } from "@/components/shipments/add-shipment-modal";
 import { BulkImportModal } from "@/components/shipments/bulk-import-modal";
 import { ShipmentDetailsDrawer } from "@/components/shipments/shipment-details";
 import { EditShipmentModal } from "@/components/shipments/edit-shipment-modal";
-import { getShipments, getAgencies, updateShipmentStatus } from "@/lib/data/api";
+import { getShipments, getAgencies, updateShipmentStatus, deleteShipment } from "@/lib/data/api";
 import { formatDate, daysUntil, cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import {
   STATUS_LABELS,
   SHIPPING_TYPE_LABELS,
   type ShipmentStatus,
+  type Shipment,
 } from "@/lib/types";
 
 export default function ShipmentsPage() {
@@ -70,6 +72,19 @@ export default function ShipmentsPage() {
     await updateShipmentStatus(id, value);
     queryClient.invalidateQueries({ queryKey: ["shipments"] });
     queryClient.invalidateQueries({ queryKey: ["stats"] });
+  };
+
+  const handleDelete = async (s: Shipment) => {
+    if (!window.confirm(`هل أنت متأكد من حذف الشحنة ${s.waybill_number}؟ سيتم حذف سجلها نهائياً.`)) return;
+    try {
+      await deleteShipment(s.id);
+      toast.success("تم حذف الشحنة");
+      queryClient.invalidateQueries({ queryKey: ["shipments"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["agency-stats"] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   };
 
   return (
@@ -223,6 +238,16 @@ export default function ShipmentsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
+                        {can("shipments.delete") && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(s)}
+                            title="حذف الشحنة"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        )}
                         {isAdmin && (
                           <Button
                             variant="ghost"

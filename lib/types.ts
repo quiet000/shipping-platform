@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "supervisor" | "driver" | "accountant";
+export type UserRole = "admin" | "supervisor" | "branch_manager" | "driver" | "accountant";
 
 export type ShipmentStatus =
   | "in_warehouse"
@@ -110,6 +110,7 @@ export const STATUS_DOT: Record<ShipmentStatus, string> = {
 export const ROLE_LABELS: Record<UserRole, string> = {
   admin: "مدير",
   supervisor: "مشرف",
+  branch_manager: "مدير فرع",
   driver: "سائق / مندوب",
   accountant: "محاسب",
 };
@@ -117,6 +118,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 export const ROLE_BADGE: Record<UserRole, string> = {
   admin: "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300",
   supervisor: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300",
+  branch_manager: "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300",
   driver: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
   accountant: "bg-cyan-100 text-cyan-800 dark:bg-cyan-500/15 dark:text-cyan-300",
 };

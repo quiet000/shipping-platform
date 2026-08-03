@@ -34,6 +34,7 @@ const PERMISSION_OPTIONS = [
   { key: "shipments.create", label: "إضافة شحنات" },
   { key: "shipments.update", label: "تعديل الشحنات" },
   { key: "shipments.update.status", label: "تغيير حالة الشحنات" },
+  { key: "shipments.delete", label: "حذف الشحنات" },
   { key: "shipments.bulk", label: "استيراد من إكسيل" },
   { key: "analytics.view", label: "عرض الإحصائيات" },
   { key: "notifications.view", label: "عرض التنبيهات" },
@@ -42,6 +43,15 @@ const PERMISSION_OPTIONS = [
 const DEFAULT_PERMS: Record<UserRole, Record<string, boolean>> = {
   admin: { "*": true },
   supervisor: {
+    "shipments.view": true,
+    "shipments.create": true,
+    "shipments.update": true,
+    "shipments.update.status": true,
+    "shipments.bulk": true,
+    "analytics.view": true,
+    "notifications.view": true,
+  },
+  branch_manager: {
     "shipments.view": true,
     "shipments.create": true,
     "shipments.update": true,

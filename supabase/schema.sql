@@ -4,7 +4,7 @@
 -- ============================================================
 
 -- 1. Enum types for status & roles
-CREATE TYPE user_role AS ENUM ('admin', 'supervisor', 'driver', 'accountant');
+CREATE TYPE user_role AS ENUM ('admin', 'supervisor', 'branch_manager', 'driver', 'accountant');
 CREATE TYPE shipment_status AS ENUM ('in_warehouse', 'out_for_delivery', 'delivered', 'returned', 'delayed');
 CREATE TYPE shipping_type AS ENUM ('standard', 'express');
 
@@ -128,12 +128,17 @@ CREATE POLICY "shipments_read_all_staff" ON shipments
 
 CREATE POLICY "shipments_insert_staff" ON shipments
   FOR INSERT WITH CHECK (
-    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor')
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager')
   );
 
 CREATE POLICY "shipments_update_admin_supervisor" ON shipments
   FOR UPDATE USING (
-    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor')
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager')
+  );
+
+CREATE POLICY "shipments_delete_admin" ON shipments
+  FOR DELETE USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
 
 CREATE POLICY "shipments_update_assigned_driver" ON shipments
@@ -196,7 +201,7 @@ CREATE POLICY "logs_read_all" ON shipment_logs
 
 CREATE POLICY "logs_insert_staff" ON shipment_logs
   FOR INSERT WITH CHECK (
-    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor')
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager')
   );
 
 -- ============================================================
