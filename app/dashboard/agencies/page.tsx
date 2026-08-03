@@ -302,6 +302,7 @@ function AgencyStatsDrawer({
     queryKey: ["agency-stats", agencyId],
     queryFn: () => getAgencyStats(agencyId!),
     enabled: !!agencyId,
+    refetchInterval: 15_000,
   });
 
   const items = [
