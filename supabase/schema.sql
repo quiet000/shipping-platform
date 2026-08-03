@@ -90,6 +90,8 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shipment_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trucks ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 --  RLS Policies
