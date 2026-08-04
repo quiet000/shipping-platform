@@ -73,14 +73,20 @@ async function getSessionToken(): Promise<string | null> {
 
 // ---------------- Shipments ----------------
 
-export async function getShipments(): Promise<Shipment[]> {
-  if (!hasSupabaseEnv) return [...mockShipments];
-  const { data, error } = await db()
+export async function getShipments(driverId?: string): Promise<Shipment[]> {
+  if (!hasSupabaseEnv) {
+    return driverId
+      ? mockShipments.filter((s) => s.assigned_driver_id === driverId)
+      : [...mockShipments];
+  }
+  let query = db()
     .from("shipments")
     .select(
       "*, agency:agencies(name), assigned_driver:profiles!shipments_assigned_driver_id_fkey(full_name)"
     )
     .order("created_at", { ascending: false });
+  if (driverId) query = query.eq("assigned_driver_id", driverId);
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return data as Shipment[];
 }
@@ -283,8 +289,8 @@ function statsCutoff(range: StatsRange): number | null {
   return null;
 }
 
-export async function getDashboardStats(range: StatsRange = "all") {
-  const shipments = await getShipments();
+export async function getDashboardStats(range: StatsRange = "all", driverId?: string) {
+  const shipments = await getShipments(driverId);
   const cutoff = statsCutoff(range);
   const inRange = cutoff
     ? shipments.filter((s) => new Date(s.created_at).getTime() >= cutoff)
@@ -312,8 +318,8 @@ export async function getDashboardStats(range: StatsRange = "all") {
   };
 }
 
-export async function getDeliveryTrend() {
-  const shipments = await getShipments();
+export async function getDeliveryTrend(driverId?: string) {
+  const shipments = await getShipments(driverId);
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -332,9 +338,9 @@ export async function getDeliveryTrend() {
   });
 }
 
-export async function getAgencyBreakdown() {
+export async function getAgencyBreakdown(driverId?: string) {
   const agencies = await getAgencies();
-  const shipments = await getShipments();
+  const shipments = await getShipments(driverId);
   return agencies.map((a) => {
     const list = shipments.filter((s) => s.agency_id === a.id);
     return {

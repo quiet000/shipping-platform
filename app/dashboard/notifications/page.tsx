@@ -39,7 +39,7 @@ export default function NotificationsPage() {
     refetchInterval: 30_000,
   });
 
-  const { data: shipments = [] } = useQuery({ queryKey: ["shipments"], queryFn: getShipments });
+  const { data: shipments = [] } = useQuery({ queryKey: ["shipments"], queryFn: () => getShipments() });
 
   const sla = useMutation({
     mutationFn: generateSlaAlerts,

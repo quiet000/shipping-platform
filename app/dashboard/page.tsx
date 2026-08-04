@@ -24,6 +24,7 @@ import {
 } from "@/lib/data/api";
 import { formatCurrency, formatTimeAgo } from "@/lib/utils";
 import { SHIPPING_TYPE_LABELS, STATUS_LABELS, type Shipment } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
 import {
   AreaChart,
   Area,
@@ -67,26 +68,29 @@ function KpiCard({
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const isDriver = user?.role === "driver";
+  const driverId = isDriver ? user.id : undefined;
   const [range, setRange] = useState<StatsRange>("all");
   const { data: stats, isLoading: loadingStats } = useQuery({
-    queryKey: ["stats", range],
-    queryFn: () => getDashboardStats(range),
+    queryKey: ["stats", range, driverId],
+    queryFn: () => getDashboardStats(range, driverId),
     refetchInterval: 15_000,
   });
 
   const { data: trend = [] } = useQuery({
-    queryKey: ["delivery-trend"],
-    queryFn: getDeliveryTrend,
+    queryKey: ["delivery-trend", driverId],
+    queryFn: () => getDeliveryTrend(driverId),
   });
 
   const { data: agencyData = [] } = useQuery({
-    queryKey: ["agency-breakdown"],
-    queryFn: getAgencyBreakdown,
+    queryKey: ["agency-breakdown", driverId],
+    queryFn: () => getAgencyBreakdown(driverId),
   });
 
   const { data: shipments = [] } = useQuery({
-    queryKey: ["shipments"],
-    queryFn: getShipments,
+    queryKey: ["shipments", driverId],
+    queryFn: () => getShipments(driverId),
     refetchInterval: 15_000,
   });
 
@@ -141,12 +145,21 @@ export default function DashboardPage() {
           icon={RotateCcw}
           color="bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"
         />
-        <KpiCard
-          title="سائقون نشطون"
-          value={loadingStats ? "..." : stats?.activeDrivers ?? 0}
-          icon={Users}
-          color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400"
-        />
+        {isDriver ? (
+          <KpiCard
+            title="خرجت للتوصيل"
+            value={loadingStats ? "..." : stats?.outForDelivery ?? 0}
+            icon={Truck}
+            color="bg-cyan-100 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400"
+          />
+        ) : (
+          <KpiCard
+            title="سائقون نشطون"
+            value={loadingStats ? "..." : stats?.activeDrivers ?? 0}
+            icon={Users}
+            color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400"
+          />
+        )}
         <KpiCard
           title="إجمالي الإيرادات"
           value={loadingStats ? "..." : formatCurrency(stats?.revenue ?? 0)}
