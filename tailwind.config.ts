@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-cairo)", "system-ui", "sans-serif"],
+        sans: ["var(--font-almarai)", "system-ui", "sans-serif"],
       },
       colors: {
         navy: {
@@ -27,9 +27,9 @@ const config: Config = {
           950: "#0F172A",
         },
         accent: {
-          DEFAULT: "#F59E0B",
-          light: "#fbbf24",
-          dark: "#d97706",
+          DEFAULT: "#0369A1",
+          light: "#0ea5e9",
+          dark: "#075985",
         },
         success: "#16a34a",
         warning: "#f59e0b",

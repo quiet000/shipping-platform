@@ -76,7 +76,7 @@ export function Topbar({ onMenuClick, title }: TopbarProps) {
                   }}
                   className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  <KeyRound className="h-4 w-4 text-amber-600" />
+                  <KeyRound className="h-4 w-4 text-blue-600 dark:text-sky-400" />
                   تغيير كلمة المرور
                 </button>
                 <button

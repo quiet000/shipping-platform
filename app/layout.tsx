@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
+import { Almarai } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 
-const cairo = Cairo({
+const almarai = Almarai({
+  weight: ["300", "400", "700", "800"],
   subsets: ["arabic", "latin"],
-  variable: "--font-cairo",
+  variable: "--font-almarai",
   display: "swap",
 });
 
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={cairo.className}>
+      <body className={almarai.className}>
         <Providers>
           <AuthProvider>{children}</AuthProvider>
         </Providers>

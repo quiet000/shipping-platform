@@ -69,7 +69,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900 dark:bg-blue-600">
-              <Package className="h-5 w-5 text-accent" />
+              <Package className="h-5 w-5 text-sky-300" />
             </div>
             <div>
               <p className="text-sm font-black text-navy-900 dark:text-white">شحن إكسبريس</p>

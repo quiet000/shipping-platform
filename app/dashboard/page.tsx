@@ -44,15 +44,20 @@ function KpiCard({
   sub,
   icon: Icon,
   color,
+  delay = 0,
 }: {
   title: string;
   value: string | number;
   sub?: string;
   icon: React.ElementType;
   color: string;
+  delay?: number;
 }) {
   return (
-    <Card className="transition hover:shadow-md">
+    <Card
+      className="animate-fade-up transition hover:shadow-md"
+      style={{ animationDelay: `${delay}s` }}
+    >
       <CardContent className="flex items-center gap-4 p-5">
         <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${color}`}>
           <Icon className="h-6 w-6" />
@@ -125,12 +130,14 @@ export default function DashboardPage() {
           value={loadingStats ? "..." : stats?.total ?? 0}
           icon={Package}
           color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+          delay={0}
         />
         <KpiCard
           title="تم التسليم"
           value={loadingStats ? "..." : stats?.delivered ?? 0}
           icon={PackageCheck}
           color="bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400"
+          delay={0.06}
         />
         <KpiCard
           title="قيد المعالجة"
@@ -138,12 +145,14 @@ export default function DashboardPage() {
           sub={`${stats?.outForDelivery ?? 0} خرجت للتوصيل`}
           icon={Clock4}
           color="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400"
+          delay={0.12}
         />
         <KpiCard
           title="مرتجعات"
           value={loadingStats ? "..." : stats?.returned ?? 0}
           icon={RotateCcw}
           color="bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"
+          delay={0.18}
         />
         {isDriver ? (
           <KpiCard
@@ -151,6 +160,7 @@ export default function DashboardPage() {
             value={loadingStats ? "..." : stats?.outForDelivery ?? 0}
             icon={Truck}
             color="bg-cyan-100 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400"
+            delay={0.24}
           />
         ) : (
           <KpiCard
@@ -158,6 +168,7 @@ export default function DashboardPage() {
             value={loadingStats ? "..." : stats?.activeDrivers ?? 0}
             icon={Users}
             color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400"
+            delay={0.24}
           />
         )}
         <KpiCard
@@ -165,6 +176,7 @@ export default function DashboardPage() {
           value={loadingStats ? "..." : formatCurrency(stats?.revenue ?? 0)}
           icon={CircleDollarSign}
           color="bg-accent/15 text-accent"
+          delay={0.3}
         />
       </div>
 

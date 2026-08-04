@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LogIn, ShieldCheck, Truck, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -47,15 +46,18 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center">
+        <div className="animate-fade-up mb-8 flex flex-col items-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-            <Truck className="h-9 w-9 text-accent" />
+            <Truck className="h-9 w-9 text-sky-300" />
           </div>
           <h1 className="text-2xl font-black text-white">بوابة الموظفين</h1>
           <p className="mt-1 text-sm text-slate-400">تسجيل الدخول إلى نظام إدارة الشحنات</p>
         </div>
 
-        <Card className="p-8">
+        <div
+          className="animate-fade-up glass rounded-2xl border border-slate-200/40 p-8 shadow-2xl shadow-blue-950/40"
+          style={{ animationDelay: "0.1s" }}
+        >
           <div className="mb-6 flex items-center gap-3 rounded-xl bg-blue-50 p-3 dark:bg-blue-500/10">
             <ShieldCheck className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
             <p className="text-xs text-slate-600 dark:text-slate-300">
@@ -113,7 +115,7 @@ export default function LoginPage() {
               </p>
             </div>
           )}
-        </Card>
+        </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
           مشكلة في الدخول؟ تواصل مع مدير النظام.

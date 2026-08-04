@@ -92,7 +92,7 @@ export default function TrucksPage() {
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-accent dark:bg-blue-600 dark:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 dark:bg-blue-600 dark:text-white">
                     <Truck className="h-6 w-6" />
                   </div>
                   <div>

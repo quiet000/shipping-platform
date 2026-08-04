@@ -85,16 +85,16 @@ export default function LandingPage() {
     <div className="min-h-screen">
       {/* Header */}
       <header
-        className={`fixed inset-x-0 top-0 z-40 transition-all ${
+        className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/90"
+            ? "glass border-b border-slate-200/70 shadow-sm dark:border-slate-800"
             : "bg-transparent"
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-900 dark:bg-blue-600">
-              <Truck className="h-6 w-6 text-accent" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-navy-900 to-navy-800 shadow-md dark:from-blue-700 dark:to-sky-500">
+              <Truck className="h-6 w-6 text-sky-300" />
             </div>
             <div>
               <p className="text-lg font-black text-navy-900 dark:text-white">شحن إكسبريس</p>
@@ -137,21 +137,28 @@ export default function LandingPage() {
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
           <div className="text-center lg:text-right">
-            <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent">
+            <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-4 py-1.5 text-sm font-semibold text-sky-300">
+              <span className="animate-pulse-soft inline-block h-2 w-2 rounded-full bg-green-400" />
               <ShieldCheck className="h-4 w-4" />
               شبكة توصيل تغطي كل المحافظات
             </span>
-            <h1 className="mt-6 text-4xl font-black leading-tight text-white sm:text-5xl">
+            <h1 className="animate-fade-up mt-6 text-4xl font-black leading-tight text-white sm:text-5xl" style={{ animationDelay: "0.06s" }}>
               تتبع شحنتك
-              <span className="mx-2 bg-gradient-to-l from-accent to-accent-light bg-clip-text text-transparent">
+              <span className="mx-2 bg-gradient-to-l from-sky-400 via-blue-400 to-blue-300 bg-clip-text text-transparent">
                 لحظة بلحظة
               </span>
               وبكل سهولة
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-slate-300 lg:mx-0">
+            <p
+              className="animate-fade-up mx-auto mt-4 max-w-lg text-lg text-slate-300 lg:mx-0"
+              style={{ animationDelay: "0.12s" }}
+            >
               منصة شحن لوجستية متكاملة تتيح لك تتبع شحناتك ومعرفة موعد التوصيل المتوقع في أي وقت ومن أي مكان.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+            <div
+              className="animate-fade-up mt-8 flex flex-wrap justify-center gap-4 lg:justify-start"
+              style={{ animationDelay: "0.18s" }}
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-500/15">
                   <Package className="h-5 w-5 text-green-400" />
@@ -162,8 +169,8 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-500/15">
-                  <MapPin className="h-5 w-5 text-blue-400" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500/15">
+                  <MapPin className="h-5 w-5 text-sky-300" />
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-white">27 محافظة</p>
@@ -173,17 +180,26 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <Card className="p-6 shadow-2xl sm:p-8">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/15">
-                <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <Card
+            className="animate-fade-up p-6 shadow-2xl sm:p-8"
+            style={{ animationDelay: "0.24s" }}
+          >
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/15">
+                  <Search className="h-5 w-5 text-blue-600 dark:text-sky-300" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-800 dark:text-white">تتبع شحنتك الآن</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    أدخل رقم البوليصة لمعرفة حالة شحنتك
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-black text-slate-800 dark:text-white">تتبع شحنتك الآن</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  أدخل رقم البوليصة لمعرفة حالة شحنتك
-                </p>
-              </div>
+              <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[10px] font-bold text-green-600 dark:bg-green-500/15 dark:text-green-400">
+                <span className="animate-pulse-soft inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                مباشر
+              </span>
             </div>
 
             <form onSubmit={submitTrack} className="space-y-3">
@@ -219,6 +235,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Live metrics strip */}
+      <section className="relative z-10 mx-auto -mt-10 max-w-6xl px-4 sm:px-6">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[
+            { n: "+25K", t: "شحنة تم تسليمها", dot: "bg-green-500" },
+            { n: "27", t: "محافظة نغطيها يومياً", dot: "bg-sky-400" },
+            { n: "120+", t: "مندوب وسائق", dot: "bg-blue-500" },
+            { n: "98%", t: "تسليم في الموعد", dot: "bg-green-400" },
+          ].map((m, i) => (
+            <Card
+              key={m.t}
+              className="animate-fade-up glass p-5 text-center shadow-lg"
+              style={{ animationDelay: `${0.05 + i * 0.06}s` }}
+            >
+              <div className="mb-2 flex items-center justify-center gap-1.5">
+                <span className={`animate-pulse-soft inline-block h-2 w-2 rounded-full ${m.dot}`} />
+                <p className="text-2xl font-black text-navy-900 dark:text-white">{m.n}</p>
+              </div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{m.t}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* Services */}
       <section id="services" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -233,7 +273,7 @@ export default function LandingPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s) => (
             <Card key={s.title} className="group p-6 transition hover:-translate-y-1 hover:shadow-lg">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-accent transition group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-600">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 transition group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-600">
                 <s.icon className="h-6 w-6" />
               </div>
               <h3 className="mb-2 font-bold text-slate-800 dark:text-slate-100">{s.title}</h3>
@@ -247,7 +287,7 @@ export default function LandingPage() {
       <section id="about" className="bg-white py-20 dark:bg-slate-900/50">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
           <div className="relative">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-l from-blue-600/20 to-accent/20 blur-2xl" />
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-l from-blue-600/20 to-sky-400/20 blur-2xl" />
             <div className="relative grid grid-cols-2 gap-4">
               {[
                 { n: "2015", t: "سنة التأسيس" },
@@ -328,8 +368,8 @@ export default function LandingPage() {
                 key={c.t}
                 className="flex items-center gap-4 border-slate-800 bg-slate-900 p-6 text-white"
               >
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent/15">
-                  <c.icon className="h-6 w-6 text-accent" />
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-sky-400/15">
+                  <c.icon className="h-6 w-6 text-sky-300" />
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">{c.t}</p>
@@ -344,13 +384,13 @@ export default function LandingPage() {
       <footer className="border-t border-slate-800 bg-navy-950 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6">
           <div className="flex items-center gap-2">
-            <Truck className="h-5 w-5 text-accent" />
+            <Truck className="h-5 w-5 text-sky-300" />
             <span className="font-black text-white">شحن إكسبريس</span>
           </div>
           <p className="text-sm text-slate-500">
             © {new Date().getFullYear()} شحن إكسبريس لخدمات الشحن اللوجستي. جميع الحقوق محفوظة.
           </p>
-          <Link href="/login" className="text-sm text-slate-400 transition hover:text-accent">
+          <Link href="/login" className="text-sm text-slate-400 transition hover:text-sky-300">
             بوابة الموظفين
           </Link>
         </div>

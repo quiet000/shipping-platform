@@ -15,7 +15,7 @@ const variants: Record<Variant, string> = {
   primary:
     "bg-navy-900 text-white hover:bg-navy-800 focus:ring-navy-900 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-600",
   accent:
-    "bg-accent text-navy-950 hover:bg-accent-light focus:ring-accent",
+    "bg-gradient-to-l from-[#0369A1] to-[#0ea5e9] text-white shadow-md shadow-blue-600/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30 focus:ring-[#0369A1]",
   outline:
     "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 focus:ring-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700",
   ghost:
