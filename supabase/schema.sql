@@ -54,6 +54,7 @@ CREATE TABLE shipments (
     destination_city VARCHAR(100) NOT NULL,
     shipping_type shipping_type DEFAULT 'standard',
     status shipment_status DEFAULT 'in_warehouse',
+    is_fragile BOOLEAN NOT NULL DEFAULT FALSE,
     agency_id UUID REFERENCES agencies(id) ON DELETE SET NULL,
     assigned_driver_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,

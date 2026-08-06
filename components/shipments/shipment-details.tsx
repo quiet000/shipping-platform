@@ -8,6 +8,7 @@ import {
   CalendarClock,
   User,
   Package,
+  PackageOpen,
   Building2,
   X,
 } from "lucide-react";
@@ -63,6 +64,37 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
     setUpdating(false);
   };
 
+  const rows: {
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    valueClass?: string;
+  }[] = [
+    { icon: User, label: "العميل", value: shipment.client_name },
+    { icon: Phone, label: "الهاتف", value: shipment.client_phone },
+    { icon: Building2, label: "الوكالة", value: shipment.agency?.name ?? "—" },
+    { icon: User, label: "المندوب", value: shipment.assigned_driver?.full_name ?? "غير محدد" },
+    { icon: MapPin, label: "المدينة", value: shipment.destination_city },
+    { icon: MapPin, label: "العنوان", value: shipment.destination_address },
+    { icon: Package, label: "نوع الشحن", value: SHIPPING_TYPE_LABELS[shipment.shipping_type] },
+    {
+      icon: PackageOpen,
+      label: "قابلية الكسر",
+      value: shipment.is_fragile ? "قابلة للكسر" : "غير قابلة للكسر",
+      valueClass: shipment.is_fragile ? "text-amber-600 dark:text-amber-400" : undefined,
+    },
+    {
+      icon: CalendarClock,
+      label: "التسليم المتوقع",
+      value: formatDate(shipment.expected_delivery_date),
+    },
+    {
+      icon: CalendarClock,
+      label: "السعر / التحصيل",
+      value: `${shipment.price} ج.م / ${shipment.cod_amount} ج.م`,
+    },
+  ];
+
   return (
     <Drawer open={!!shipmentId} onClose={onClose} title={`تفاصيل الشحنة`}>
       <div className="space-y-6">
@@ -77,29 +109,18 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
         </div>
 
         <div className="space-y-3">
-          {[
-            { icon: User, label: "العميل", value: shipment.client_name },
-            { icon: Phone, label: "الهاتف", value: shipment.client_phone },
-            { icon: Building2, label: "الوكالة", value: shipment.agency?.name ?? "—" },
-            { icon: User, label: "المندوب", value: shipment.assigned_driver?.full_name ?? "غير محدد" },
-            { icon: MapPin, label: "المدينة", value: shipment.destination_city },
-            { icon: MapPin, label: "العنوان", value: shipment.destination_address },
-            { icon: Package, label: "نوع الشحن", value: SHIPPING_TYPE_LABELS[shipment.shipping_type] },
-            {
-              icon: CalendarClock,
-              label: "التسليم المتوقع",
-              value: formatDate(shipment.expected_delivery_date),
-            },
-            {
-              icon: CalendarClock,
-              label: "السعر / التحصيل",
-              value: `${shipment.price} ج.م / ${shipment.cod_amount} ج.م`,
-            },
-          ].map((row) => (
+          {rows.map((row) => (
             <div key={row.label} className="flex items-center gap-3 text-sm">
               <row.icon className="h-4 w-4 flex-shrink-0 text-slate-400" />
               <span className="w-28 flex-shrink-0 text-xs font-semibold text-slate-400">{row.label}</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-200">{row.value}</span>
+              <span
+                className={
+                  "font-semibold text-slate-700 dark:text-slate-200" +
+                  (row.valueClass ? ` ${row.valueClass}` : "")
+                }
+              >
+                {row.value}
+              </span>
             </div>
           ))}
         </div>

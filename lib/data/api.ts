@@ -29,6 +29,7 @@ export type ShipmentInput = {
   destination_city: string;
   shipping_type?: ShippingType;
   status?: ShipmentStatus;
+  is_fragile?: boolean;
   agency_id?: string;
   assigned_driver_id?: string;
   price?: number;
@@ -167,6 +168,7 @@ export async function createShipment(input: ShipmentInput): Promise<Shipment> {
       destination_city: input.destination_city,
       shipping_type: input.shipping_type ?? "standard",
       status,
+      is_fragile: input.is_fragile ?? false,
       agency_id: input.agency_id ?? null,
       assigned_driver_id: input.assigned_driver_id ?? null,
       price: input.price ?? 0,
@@ -189,6 +191,7 @@ export async function createShipment(input: ShipmentInput): Promise<Shipment> {
     destination_city: input.destination_city,
     shipping_type: input.shipping_type ?? "standard",
     status,
+    is_fragile: input.is_fragile ?? false,
     agency_id: input.agency_id ?? null,
     assigned_driver_id: input.assigned_driver_id ?? null,
     price: input.price ?? 0,
@@ -219,6 +222,7 @@ export async function createShipmentsBulk(inputs: ShipmentInput[]): Promise<numb
     destination_city: i.destination_city,
     shipping_type: i.shipping_type ?? "standard",
     status: ensureStatus(i.status),
+    is_fragile: i.is_fragile ?? false,
     agency_id: i.agency_id ?? null,
     assigned_driver_id: i.assigned_driver_id ?? null,
     price: i.price ?? 0,

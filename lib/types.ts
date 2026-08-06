@@ -51,6 +51,7 @@ export interface Shipment {
   destination_city: string;
   shipping_type: ShippingType;
   status: ShipmentStatus;
+  is_fragile?: boolean;
   agency_id?: string | null;
   assigned_driver_id?: string | null;
   price: number;

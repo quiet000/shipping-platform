@@ -25,6 +25,7 @@ export function EditShipmentModal({ shipment, onClose }: Props) {
     destination_address: "",
     destination_city: "",
     shipping_type: "standard" as ShippingType,
+    is_fragile: false,
     agency_id: "",
     assigned_driver_id: "",
     price: 0,
@@ -43,6 +44,7 @@ export function EditShipmentModal({ shipment, onClose }: Props) {
         destination_address: shipment.destination_address,
         destination_city: shipment.destination_city,
         shipping_type: shipment.shipping_type,
+        is_fragile: shipment.is_fragile ?? false,
         agency_id: shipment.agency_id ?? "",
         assigned_driver_id: shipment.assigned_driver_id ?? "",
         price: Number(shipment.price) || 0,
@@ -61,6 +63,7 @@ export function EditShipmentModal({ shipment, onClose }: Props) {
         destination_address: form.destination_address,
         destination_city: form.destination_city,
         shipping_type: form.shipping_type,
+        is_fragile: form.is_fragile,
         agency_id: form.agency_id || null,
         assigned_driver_id: form.assigned_driver_id || null,
         price: Number(form.price) || 0,
@@ -142,16 +145,29 @@ export function EditShipmentModal({ shipment, onClose }: Props) {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="shipping_type">نوع الشحن</Label>
-              <Select
-                id="shipping_type"
-                value={form.shipping_type}
-                onChange={(e) => set("shipping_type", e.target.value as ShippingType)}
-              >
-                <option value="standard">{SHIPPING_TYPE_LABELS.standard}</option>
-                <option value="express">{SHIPPING_TYPE_LABELS.express}</option>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="shipping_type">نوع الشحن</Label>
+                <Select
+                  id="shipping_type"
+                  value={form.shipping_type}
+                  onChange={(e) => set("shipping_type", e.target.value as ShippingType)}
+                >
+                  <option value="standard">{SHIPPING_TYPE_LABELS.standard}</option>
+                  <option value="express">{SHIPPING_TYPE_LABELS.express}</option>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="is_fragile">هل الشحنة قابلة للكسر؟</Label>
+                <Select
+                  id="is_fragile"
+                  value={form.is_fragile ? "yes" : "no"}
+                  onChange={(e) => set("is_fragile", e.target.value === "yes")}
+                >
+                  <option value="no">لا — غير قابلة للكسر</option>
+                  <option value="yes">نعم — قابلة للكسر</option>
+                </Select>
+              </div>
             </div>
 
             <div>

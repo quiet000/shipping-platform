@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, FileSpreadsheet, Search, Eye, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, FileSpreadsheet, Search, Eye, Pencil, Trash2, AlertTriangle, PackageOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -199,6 +199,9 @@ export default function ShipmentsPage() {
                         </span>
                         {overdue && (
                           <AlertTriangle className="h-4 w-4 text-red-500" />
+                        )}
+                        {s.is_fragile && (
+                          <PackageOpen className="h-4 w-4 text-amber-500" aria-label="قابلة للكسر" />
                         )}
                       </div>
                       <span className="text-[10px] text-slate-400">{SHIPPING_TYPE_LABELS[s.shipping_type]}</span>

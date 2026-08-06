@@ -27,6 +27,7 @@ const empty: Omit<ShipmentInput, "expected_delivery_date"> & {
   waybill_number: "",
   shipping_type: "standard",
   status: "in_warehouse",
+  is_fragile: false,
   agency_id: "",
   assigned_driver_id: "",
   price: 0,
@@ -122,6 +123,20 @@ export function AddShipmentModal({ open, onClose }: Props) {
                 </option>
               ))}
             </Select>
+          </div>
+          <div>
+            <Label htmlFor="is_fragile">هل الشحنة قابلة للكسر؟</Label>
+            <Select
+              id="is_fragile"
+              value={form.is_fragile ? "yes" : "no"}
+              onChange={(e) => set("is_fragile", e.target.value === "yes")}
+            >
+              <option value="no">غير قابلة للكسر</option>
+              <option value="yes">قابلة للكسر</option>
+            </Select>
+            <p className="mt-1 text-[11px] text-slate-400">
+              الافتراضي: غير قابلة للكسر
+            </p>
           </div>
 
           <div>
