@@ -169,13 +169,16 @@ export function AddShipmentModal({ open, onClose }: Props) {
               type="date"
               value={form.expected_delivery_date}
               onChange={(e) => set("expected_delivery_date", e.target.value)}
-              required
             />
-            {form.expected_delivery_date && (
+            {form.expected_delivery_date ? (
               <p className="mt-1 text-[11px] text-slate-400">
                 {daysUntil(form.expected_delivery_date) >= 0
                   ? `بعد ${daysUntil(form.expected_delivery_date)} يوم`
                   : "تاريخ فات موعده"}
+              </p>
+            ) : (
+              <p className="mt-1 text-[11px] text-slate-400">
+                اتركه فارغاً وسيُحدَّد تلقائياً بعد 3 أيام من اليوم
               </p>
             )}
           </div>

@@ -140,22 +140,38 @@ export async function getShipmentLogs(shipmentId: string): Promise<ShipmentLog[]
   return data as ShipmentLog[];
 }
 
+function ensureWaybill(v?: string): string {
+  return v?.trim() || `SHP-${Math.floor(100000 + Math.random() * 900000)}`;
+}
+
+function ensureDeliveryDate(v?: string): string {
+  return v?.trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+}
+
+function ensureStatus(v?: ShipmentStatus): ShipmentStatus {
+  return v || "in_warehouse";
+}
+
 export async function createShipment(input: ShipmentInput): Promise<Shipment> {
+  const waybill_number = ensureWaybill(input.waybill_number);
+  const expected_delivery_date = ensureDeliveryDate(input.expected_delivery_date);
+  const status = ensureStatus(input.status);
+
   if (!hasSupabaseEnv) {
     const s: Shipment = {
       id: `shp-${Math.random().toString(36).slice(2, 8)}`,
-      waybill_number: input.waybill_number ?? `SHP-${Math.floor(100000 + Math.random() * 900000)}`,
+      waybill_number,
       client_name: input.client_name,
       client_phone: input.client_phone,
       destination_address: input.destination_address,
       destination_city: input.destination_city,
       shipping_type: input.shipping_type ?? "standard",
-      status: input.status ?? "in_warehouse",
+      status,
       agency_id: input.agency_id ?? null,
       assigned_driver_id: input.assigned_driver_id ?? null,
       price: input.price ?? 0,
       cod_amount: input.cod_amount ?? 0,
-      expected_delivery_date: input.expected_delivery_date,
+      expected_delivery_date,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       agency: mockAgencies.find((a) => a.id === input.agency_id) ?? null,
@@ -166,20 +182,18 @@ export async function createShipment(input: ShipmentInput): Promise<Shipment> {
   }
 
   const payload: Record<string, unknown> = {
-    waybill_number:
-      input.waybill_number ??
-      `SHP-${Math.floor(100000 + Math.random() * 900000)}`,
+    waybill_number,
     client_name: input.client_name,
     client_phone: input.client_phone,
     destination_address: input.destination_address,
     destination_city: input.destination_city,
     shipping_type: input.shipping_type ?? "standard",
-    status: input.status ?? "in_warehouse",
+    status,
     agency_id: input.agency_id ?? null,
     assigned_driver_id: input.assigned_driver_id ?? null,
     price: input.price ?? 0,
     cod_amount: input.cod_amount ?? 0,
-    expected_delivery_date: input.expected_delivery_date,
+    expected_delivery_date,
   };
   const { data, error } = await db()
     .from("shipments")
@@ -198,20 +212,18 @@ export async function createShipmentsBulk(inputs: ShipmentInput[]): Promise<numb
     return inputs.length;
   }
   const payload = inputs.map((i) => ({
-    waybill_number:
-      i.waybill_number ??
-      `SHP-${Math.floor(100000 + Math.random() * 900000)}`,
+    waybill_number: ensureWaybill(i.waybill_number),
     client_name: i.client_name,
     client_phone: i.client_phone,
     destination_address: i.destination_address,
     destination_city: i.destination_city,
     shipping_type: i.shipping_type ?? "standard",
-    status: i.status ?? "in_warehouse",
+    status: ensureStatus(i.status),
     agency_id: i.agency_id ?? null,
     assigned_driver_id: i.assigned_driver_id ?? null,
     price: i.price ?? 0,
     cod_amount: i.cod_amount ?? 0,
-    expected_delivery_date: i.expected_delivery_date,
+    expected_delivery_date: ensureDeliveryDate(i.expected_delivery_date),
   }));
   const { error } = await db().from("shipments").insert(payload);
   if (error) throw new Error(error.message);
