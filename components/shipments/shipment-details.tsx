@@ -33,7 +33,7 @@ interface Props {
 }
 
 export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props) {
-  const { can } = useAuth();
+  const { can, user } = useAuth();
   const [updating, setUpdating] = useState(false);
 
   const { data: shipment, refetch: refetchShipment } = useQuery({
@@ -58,7 +58,7 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
 
   const changeStatus = async (status: ShipmentStatus) => {
     setUpdating(true);
-    await updateShipmentStatus(shipment.id, status);
+    await updateShipmentStatus(shipment.id, status, undefined, user?.id);
     await refetchShipment();
     onChanged();
     setUpdating(false);

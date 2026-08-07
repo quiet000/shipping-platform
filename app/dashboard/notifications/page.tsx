@@ -31,28 +31,32 @@ import { ALERT_STYLES, ALERT_ICON_COLORS, STATUS_LABELS, type ShipmentStatus } f
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const driverId = user?.role === "driver" ? user.id : undefined;
   const [filter, setFilter] = useState("all");
 
   const { data: notifications = [] } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: getNotifications,
+    queryKey: ["notifications", driverId],
+    queryFn: () => getNotifications(driverId),
     refetchInterval: 30_000,
   });
 
-  const { data: shipments = [] } = useQuery({ queryKey: ["shipments"], queryFn: () => getShipments() });
+  const { data: shipments = [] } = useQuery({
+    queryKey: ["shipments", driverId],
+    queryFn: () => getShipments(driverId),
+  });
 
   const sla = useMutation({
     mutationFn: generateSlaAlerts,
     onSuccess: () => {
       toast.success("تم فحص الشحنات وإنشاء تنبيهات SLA جديدة");
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications", driverId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const markAll = useMutation({
-    mutationFn: markAllNotificationsRead,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    mutationFn: () => markAllNotificationsRead(driverId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications", driverId] }),
   });
 
   const urgentShipments = useMemo(() => {
@@ -119,7 +123,7 @@ export default function NotificationsPage() {
               {filtered.map((n) => (
                 <button
                   key={n.id}
-                  onClick={() => markNotificationRead(n.id).then(() => queryClient.invalidateQueries({ queryKey: ["notifications"] }))}
+                  onClick={() => markNotificationRead(n.id).then(() => queryClient.invalidateQueries({ queryKey: ["notifications", driverId] }))}
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl border p-4 text-right transition hover:bg-slate-50 dark:hover:bg-slate-800/60",
                     n.is_read

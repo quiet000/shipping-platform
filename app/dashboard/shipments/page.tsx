@@ -69,7 +69,7 @@ export default function ShipmentsPage() {
   }, [shipments, search, status, type, agency, driver, date, isDriver, user?.id]);
 
   const quickStatus = async (id: string, value: ShipmentStatus) => {
-    await updateShipmentStatus(id, value);
+    await updateShipmentStatus(id, value, undefined, user?.id);
     queryClient.invalidateQueries({ queryKey: ["shipments"] });
     queryClient.invalidateQueries({ queryKey: ["stats"] });
   };

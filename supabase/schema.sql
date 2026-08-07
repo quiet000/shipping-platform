@@ -173,17 +173,33 @@ CREATE POLICY "agencies_delete_admin" ON agencies
     (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
 
--- Notifications: all staff read, admin creates
+-- Notifications: staff read their relevant ones; drivers only see their own shipments' alerts
+DROP POLICY IF EXISTS "notifications_read_all" ON notifications;
 CREATE POLICY "notifications_read_all" ON notifications
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+  FOR SELECT USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+    OR EXISTS (
+      SELECT 1 FROM shipments s
+      WHERE s.id = notifications.shipment_id
+        AND s.assigned_driver_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "notifications_insert_admin" ON notifications
   FOR INSERT WITH CHECK (
     (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
 
+DROP POLICY IF EXISTS "notifications_update_all" ON notifications;
 CREATE POLICY "notifications_update_all" ON notifications
-  FOR UPDATE USING (auth.uid() IS NOT NULL);
+  FOR UPDATE USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+    OR EXISTS (
+      SELECT 1 FROM shipments s
+      WHERE s.id = notifications.shipment_id
+        AND s.assigned_driver_id = auth.uid()
+    )
+  );
 
 -- Trucks: read all, admin manages
 CREATE POLICY "trucks_read_all" ON trucks

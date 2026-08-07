@@ -238,7 +238,8 @@ export async function createShipmentsBulk(inputs: ShipmentInput[]): Promise<numb
 export async function updateShipmentStatus(
   id: string,
   status: ShipmentStatus,
-  notes?: string
+  notes?: string,
+  createdBy?: string
 ): Promise<void> {
   if (!hasSupabaseEnv) {
     const s = mockShipments.find((x) => x.id === id);
@@ -252,6 +253,7 @@ export async function updateShipmentStatus(
           status,
           location_description: s.destination_city,
           notes: notes ?? "تم تحديث الحالة",
+          created_by: createdBy ?? null,
           created_at: new Date().toISOString(),
         },
         ...(mockLogs[id] ?? []),
@@ -268,6 +270,7 @@ export async function updateShipmentStatus(
     shipment_id: id,
     status,
     notes: notes ?? "تم تحديث الحالة",
+    created_by: createdBy ?? null,
   });
 }
 
@@ -366,6 +369,72 @@ export async function getAgencyBreakdown(driverId?: string) {
       delivered: list.filter((s) => s.status === "delivered").length,
     };
   });
+}
+
+// ---------------- Employee Performance ----------------
+
+export type EmployeePerformanceRow = {
+  id: string;
+  full_name: string;
+  role: UserRole;
+  is_active: boolean;
+  total: number;
+  delivered: number;
+  returned: number;
+  pending: number;
+  expected_revenue: number;
+  collected_revenue: number;
+  lost_revenue: number;
+  days_worked: number;
+};
+
+export async function getEmployeePerformance(): Promise<EmployeePerformanceRow[]> {
+  const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
+  const shipments = await getShipments();
+
+  let logs: { created_by: string | null; created_at: string }[] = [];
+  if (!hasSupabaseEnv) {
+    logs = Object.values(mockLogs)
+      .flat()
+      .map((l) => ({ created_by: l.created_by ?? null, created_at: l.created_at }));
+  } else {
+    const { data, error } = await db()
+      .from("shipment_logs")
+      .select("created_by, created_at")
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    logs = (data ?? []) as { created_by: string | null; created_at: string }[];
+  }
+
+  const revenue = (list: Shipment[]) =>
+    list.reduce((acc, s) => acc + (s.price || 0) + (s.cod_amount || 0), 0);
+
+  const rows: EmployeePerformanceRow[] = profiles.map((p) => {
+    const assigned = shipments.filter((s) => s.assigned_driver_id === p.id);
+    const delivered = assigned.filter((s) => s.status === "delivered");
+    const returned = assigned.filter((s) => s.status === "returned");
+    const days = new Set(
+      logs.filter((l) => l.created_by === p.id).map((l) => l.created_at.slice(0, 10))
+    ).size;
+    return {
+      id: p.id,
+      full_name: p.full_name,
+      role: p.role,
+      is_active: p.is_active,
+      total: assigned.length,
+      delivered: delivered.length,
+      returned: returned.length,
+      pending: assigned.length - delivered.length - returned.length,
+      expected_revenue: revenue(assigned),
+      collected_revenue: revenue(delivered),
+      lost_revenue: revenue(returned),
+      days_worked: days,
+    };
+  });
+
+  return rows.sort(
+    (a, b) => b.collected_revenue - a.collected_revenue || b.total - a.total
+  );
 }
 
 // ---------------- Agencies ----------------
@@ -610,8 +679,27 @@ export async function deleteTruck(id: string): Promise<void> {
 
 // ---------------- Notifications ----------------
 
-export async function getNotifications(): Promise<Notification[]> {
-  if (!hasSupabaseEnv) return [...mockNotifications];
+export async function getNotifications(driverId?: string): Promise<Notification[]> {
+  if (!hasSupabaseEnv) {
+    let list = [...mockNotifications];
+    if (driverId) {
+      const mine = new Set(
+        mockShipments.filter((s) => s.assigned_driver_id === driverId).map((s) => s.id)
+      );
+      list = list.filter((n) => n.shipment_id && mine.has(n.shipment_id));
+    }
+    return list;
+  }
+  if (driverId) {
+    const { data, error } = await db()
+      .from("notifications")
+      .select("*, shipment:shipments!inner(waybill_number, expected_delivery_date)")
+      .eq("shipment.assigned_driver_id", driverId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return data as Notification[];
+  }
   const { data, error } = await db()
     .from("notifications")
     .select("*, shipment:shipments(waybill_number, expected_delivery_date)")
@@ -630,12 +718,32 @@ export async function markNotificationRead(id: string): Promise<void> {
   await db().from("notifications").update({ is_read: true }).eq("id", id);
 }
 
-export async function markAllNotificationsRead(): Promise<void> {
+export async function markAllNotificationsRead(driverId?: string): Promise<void> {
   if (!hasSupabaseEnv) {
-    mockNotifications.forEach((n) => (n.is_read = true));
+    let list = [...mockNotifications];
+    if (driverId) {
+      const mine = new Set(
+        mockShipments.filter((s) => s.assigned_driver_id === driverId).map((s) => s.id)
+      );
+      list = list.filter((n) => n.shipment_id && mine.has(n.shipment_id));
+    }
+    list.forEach((n) => (n.is_read = true));
     return;
   }
-  await db().from("notifications").update({ is_read: true }).neq("is_read", true);
+  if (driverId) {
+    const mine = await getShipments(driverId);
+    const ids = mine.map((s) => s.id);
+    if (ids.length === 0) return;
+    const { error } = await db()
+      .from("notifications")
+      .update({ is_read: true })
+      .in("shipment_id", ids)
+      .neq("is_read", true);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const { error } = await db().from("notifications").update({ is_read: true }).neq("is_read", true);
+  if (error) throw new Error(error.message);
 }
 
 export async function generateSlaAlerts(): Promise<number> {

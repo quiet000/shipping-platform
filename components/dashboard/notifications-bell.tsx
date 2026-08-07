@@ -18,15 +18,18 @@ import {
   markAllNotificationsRead,
 } from "@/lib/data/api";
 import { ALERT_STYLES, ALERT_ICON_COLORS } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
 
 export function NotificationsBell() {
+  const { user } = useAuth();
+  const driverId = user?.role === "driver" ? user.id : undefined;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   const { data: notifications = [] } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: getNotifications,
+    queryKey: ["notifications", driverId],
+    queryFn: () => getNotifications(driverId),
     refetchInterval: 30_000,
   });
 
@@ -43,12 +46,12 @@ export function NotificationsBell() {
 
   const markRead = async (id: string) => {
     await markNotificationRead(id);
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["notifications", driverId] });
   };
 
   const markAll = async () => {
-    await markAllNotificationsRead();
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    await markAllNotificationsRead(driverId);
+    queryClient.invalidateQueries({ queryKey: ["notifications", driverId] });
   };
 
   return (
