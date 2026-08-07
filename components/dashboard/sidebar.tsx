@@ -14,6 +14,7 @@ import {
   X,
   Menu,
   BarChart3,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
@@ -32,6 +33,7 @@ const navItems = [
     items: [
       { href: "/dashboard/shipments", label: "إدارة الشحنات", icon: Package, roles: ["admin", "supervisor", "branch_manager", "driver", "accountant"] },
       { href: "/dashboard/agencies", label: "الوكلاء والشركات", icon: Building2, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
+      { href: "/dashboard/attendance", label: "الحضور والانصراف", icon: CalendarClock, roles: ["admin", "supervisor", "branch_manager", "driver", "accountant"] },
     ],
   },
   {

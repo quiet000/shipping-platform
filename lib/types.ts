@@ -84,6 +84,25 @@ export interface Notification {
   shipment?: { waybill_number: string; expected_delivery_date: string } | null;
 }
 
+export type AttendanceStatus = "present" | "permission";
+
+export interface Attendance {
+  id: string;
+  employee_id: string;
+  date: string;
+  status: AttendanceStatus;
+  check_in?: string | null;
+  check_out?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
+  present: "حاضر",
+  permission: "إذن",
+};
+
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   in_warehouse: "في المخزن",
   out_for_delivery: "خرج للتوصيل",

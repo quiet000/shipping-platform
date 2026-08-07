@@ -3,6 +3,8 @@
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import type {
   Agency,
+  Attendance,
+  AttendanceStatus,
   Notification,
   Profile,
   Shipment,
@@ -751,4 +753,110 @@ export async function generateSlaAlerts(): Promise<number> {
   const { error } = await db().rpc("generate_sla_alerts");
   if (error) throw new Error(error.message);
   return 1;
+}
+
+// ---------------- Attendance ----------------
+
+export async function getAttendance(month: string, employeeId?: string): Promise<Attendance[]> {
+  const start = `${month}-01`;
+  const end = `${month}-31`;
+  if (!hasSupabaseEnv) return [];
+  let q = db()
+    .from("attendance")
+    .select("*")
+    .gte("date", start)
+    .lte("date", end)
+    .order("date", { ascending: true });
+  if (employeeId) q = q.eq("employee_id", employeeId);
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return data as Attendance[];
+}
+
+export async function getAttendanceToday(employeeId: string): Promise<Attendance | null> {
+  const today = daysFromNow(0);
+  if (!hasSupabaseEnv) return null;
+  const { data, error } = await db()
+    .from("attendance")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .eq("date", today)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as Attendance) ?? null;
+}
+
+export async function markAttendance(
+  employeeId: string,
+  status: AttendanceStatus,
+  action: "check_in" | "check_out"
+): Promise<void> {
+  const today = daysFromNow(0);
+  const now = new Date().toISOString();
+  if (!hasSupabaseEnv) return;
+  const existing = await getAttendanceToday(employeeId);
+  if (!existing) {
+    const { error } = await db().from("attendance").insert({
+      employee_id: employeeId,
+      date: today,
+      status,
+      check_in: now,
+      ...(action === "check_out" ? { check_out: now } : {}),
+    });
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const patch: Record<string, unknown> = { status, updated_at: now };
+  if (action === "check_in" && !existing.check_in) patch.check_in = now;
+  if (action === "check_out") patch.check_out = now;
+  const { error } = await db().from("attendance").update(patch).eq("id", existing.id);
+  if (error) throw new Error(error.message);
+}
+
+export type AttendanceReportRow = {
+  employee_id: string;
+  full_name: string;
+  role: UserRole;
+  is_active: boolean;
+  present_days: number;
+  permission_days: number;
+  total_days: number;
+  total_hours: number;
+  avg_check_in: string | null;
+};
+
+export async function getAttendanceReport(month: string): Promise<AttendanceReportRow[]> {
+  const records = await getAttendance(month);
+  const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
+  const hoursFor = (a: Attendance) => {
+    if (!a.check_in || !a.check_out) return 0;
+    const diff = new Date(a.check_out).getTime() - new Date(a.check_in).getTime();
+    return Math.max(0, diff / 3600000);
+  };
+  return profiles
+    .map((p) => {
+      const mine = records.filter((a) => a.employee_id === p.id);
+      const withTimes = mine.filter((a) => a.check_in);
+      const avgIn =
+        withTimes.length > 0
+          ? withTimes.reduce((s, a) => s + new Date(a.check_in!).getTime(), 0) / withTimes.length
+          : null;
+      return {
+        employee_id: p.id,
+        full_name: p.full_name,
+        role: p.role,
+        is_active: p.is_active,
+        present_days: mine.filter((a) => a.status === "present").length,
+        permission_days: mine.filter((a) => a.status === "permission").length,
+        total_days: mine.length,
+        total_hours: mine.reduce((acc, a) => acc + hoursFor(a), 0),
+        avg_check_in: avgIn
+          ? new Intl.DateTimeFormat("ar-EG", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(avgIn))
+          : null,
+      };
+    })
+    .sort((a, b) => b.total_days - a.total_days || b.total_hours - a.total_hours);
 }

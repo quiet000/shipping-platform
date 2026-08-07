@@ -86,6 +86,22 @@ CREATE TABLE notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 7b. Attendance (حضور وانصراف الموظفين)
+CREATE TYPE attendance_status AS ENUM ('present', 'permission');
+
+CREATE TABLE attendance (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+    date DATE NOT NULL,
+    status attendance_status NOT NULL DEFAULT 'present',
+    check_in TIMESTAMP WITH TIME ZONE,
+    check_out TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (employee_id, date)
+);
+
 -- 8. Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
@@ -93,6 +109,7 @@ ALTER TABLE agencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shipment_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trucks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 --  RLS Policies
@@ -227,6 +244,29 @@ CREATE POLICY "logs_insert_driver_assigned" ON shipment_logs
       WHERE s.id = shipment_id
         AND s.assigned_driver_id = auth.uid()
     )
+  );
+
+-- Attendance: each employee manages their own; management roles read all; admin manages all
+CREATE POLICY "attendance_select_own" ON attendance
+  FOR SELECT USING (auth.uid() = employee_id);
+
+CREATE POLICY "attendance_select_staff" ON attendance
+  FOR SELECT USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
+
+CREATE POLICY "attendance_insert_own" ON attendance
+  FOR INSERT WITH CHECK (auth.uid() = employee_id);
+
+CREATE POLICY "attendance_update_own" ON attendance
+  FOR UPDATE USING (auth.uid() = employee_id);
+
+CREATE POLICY "attendance_delete_own" ON attendance
+  FOR DELETE USING (auth.uid() = employee_id);
+
+CREATE POLICY "attendance_all_admin" ON attendance
+  FOR ALL USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
 
 -- ============================================================
