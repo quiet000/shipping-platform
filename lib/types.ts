@@ -98,9 +98,30 @@ export interface Attendance {
   updated_at: string;
 }
 
+export type PermissionStatus = "pending" | "approved" | "rejected";
+
+export interface PermissionRequest {
+  id: string;
+  employee_id: string;
+  date: string;
+  leave_time?: string | null;
+  notes?: string | null;
+  status: PermissionStatus;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  employee?: Pick<Profile, "full_name" | "role"> | null;
+}
+
 export const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
   present: "حاضر",
   permission: "إذن",
+};
+
+export const PERMISSION_LABELS: Record<PermissionStatus, string> = {
+  pending: "قيد المراجعة",
+  approved: "موافَق عليه",
+  rejected: "مرفوض",
 };
 
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {

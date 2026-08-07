@@ -11,20 +11,31 @@ import {
   ShieldCheck,
   CalendarCheck,
   Timer,
+  CheckCircle2,
+  XCircle,
+  UserCheck,
+  FileText,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Label, Textarea } from "@/components/ui/input";
 import { RoleBadge } from "@/components/ui/badge";
+import { Modal } from "@/components/ui/modal";
 import {
   getAttendance,
   getAttendanceToday,
   markAttendance,
   getAttendanceReport,
+  requestPermission,
+  getPermissionRequests,
+  getPendingPermissionRequests,
+  reviewPermissionRequest,
+  cancelPermissionRequest,
 } from "@/lib/data/api";
-import { formatDateTime } from "@/lib/utils";
-import { ATTENDANCE_LABELS, type AttendanceStatus } from "@/lib/types";
+import { cn, formatDateTime, formatDate, daysFromNow } from "@/lib/utils";
+import { ATTENDANCE_LABELS, PERMISSION_LABELS, type AttendanceStatus } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 
 const REPORT_ROLES = ["admin", "supervisor", "branch_manager", "accountant"];
@@ -64,12 +75,24 @@ function SummaryCard({
   );
 }
 
+const PERMISSION_STATUS_STYLES: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
+  approved: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+  rejected: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+};
+
 export default function AttendancePage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [month, setMonth] = useState(currentMonth());
   const isDriver = user?.role === "driver";
   const canSeeReport = user ? REPORT_ROLES.includes(user.role) : false;
+  const todayStr = daysFromNow(0);
+
+  const [reqOpen, setReqOpen] = useState(false);
+  const [reqDate, setReqDate] = useState(todayStr);
+  const [reqTime, setReqTime] = useState("");
+  const [reqNotes, setReqNotes] = useState("");
 
   const { data: today = null } = useQuery({
     queryKey: ["attendance-today", user?.id],
@@ -84,16 +107,35 @@ export default function AttendancePage() {
     enabled: !!user,
   });
 
+  const { data: myRequests = [] } = useQuery({
+    queryKey: ["permission-requests", month, user?.id],
+    queryFn: () => (user ? getPermissionRequests(month, user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+
   const { data: report = [] } = useQuery({
     queryKey: ["attendance-report", month],
     queryFn: () => getAttendanceReport(month),
     enabled: canSeeReport,
   });
 
+  const { data: pendingRequests = [] } = useQuery({
+    queryKey: ["permission-pending"],
+    queryFn: getPendingPermissionRequests,
+    refetchInterval: 30_000,
+    enabled: canSeeReport,
+  });
+
+  const pendingToday = myRequests.some(
+    (r) => r.date === todayStr && r.status === "pending"
+  );
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["attendance-today", user?.id] });
     queryClient.invalidateQueries({ queryKey: ["attendance", month, user?.id] });
     queryClient.invalidateQueries({ queryKey: ["attendance-report", month] });
+    queryClient.invalidateQueries({ queryKey: ["permission-requests", month, user?.id] });
+    queryClient.invalidateQueries({ queryKey: ["permission-pending"] });
   };
 
   const mark = useMutation({
@@ -106,7 +148,49 @@ export default function AttendancePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const myPresent = myMonth.filter((a) => a.status === "present").length;  const myPermission = myMonth.filter((a) => a.status === "permission").length;
+  const requestPerm = useMutation({
+    mutationFn: async () => {
+      const leave_time = reqTime
+        ? new Date(`${reqDate}T${reqTime}:00`).toISOString()
+        : undefined;
+      await requestPermission({
+        employee_id: user!.id,
+        date: reqDate,
+        leave_time,
+        notes: reqNotes.trim() || undefined,
+      });
+    },
+    onSuccess: () => {
+      toast.success("تم إرسال طلب الإذن بانتظار موافقة الإدارة");
+      setReqOpen(false);
+      setReqTime("");
+      setReqNotes("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const review = useMutation({
+    mutationFn: (args: { id: string; status: "approved" | "rejected" }) =>
+      reviewPermissionRequest(args.id, args.status),
+    onSuccess: () => {
+      toast.success("تم تحديث حالة الطلب");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const cancel = useMutation({
+    mutationFn: cancelPermissionRequest,
+    onSuccess: () => {
+      toast.success("تم إلغاء الطلب");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const myPresent = myMonth.filter((a) => a.status === "present").length;
+  const myPermission = myMonth.filter((a) => a.status === "permission").length;
   const myHours = myMonth.reduce((acc, a) => {
     if (!a.check_in || !a.check_out) return acc;
     return acc + Math.max(0, (new Date(a.check_out).getTime() - new Date(a.check_in).getTime()) / 3600000);
@@ -118,7 +202,7 @@ export default function AttendancePage() {
         <div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white">الحضور والانصراف</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            سجّل حضورك أو أذنك اليوم، وتابع التقرير الشهري للموظفين
+            سجّل حضورك، وسجّل الخروج، وقدّم طلب الإذن بانتظار موافقة الإدارة
           </p>
         </div>
         <div className="w-44">
@@ -146,7 +230,7 @@ export default function AttendancePage() {
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
                   }`}
                 >
-                  {ATTENDANCE_LABELS[today.status]}
+                  {today.status === "present" ? "حاضر" : "إذن معتمد"}
                 </span>
                 {today.check_in && (
                   <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
@@ -160,51 +244,65 @@ export default function AttendancePage() {
                     الخروج: {formatDateTime(today.check_out)}
                   </span>
                 )}
-                {!today.check_in && (
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
-                    أذن اليوم بدون وقت حضور
-                  </span>
-                )}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    mark.mutate({
-                      status: today.status === "present" ? "permission" : "present",
-                      action: "check_in",
-                    })
-                  }
-                  loading={mark.isPending}
-                >
-                  <CalendarCheck className="h-4 w-4" />
-                  تحويل إلى {today.status === "present" ? "إذن" : "حضور"}
-                </Button>
-                {!today.check_out && (
-                  <Button onClick={() => mark.mutate({ status: today.status, action: "check_out" })} loading={mark.isPending}>
+                {today.status === "present" && !today.check_out && (
+                  <Button onClick={() => mark.mutate({ status: "present", action: "check_out" })} loading={mark.isPending}>
                     <LogOut className="h-4 w-4" />
                     تسجيل الخروج
                   </Button>
+                )}
+                {today.status === "present" && !pendingToday && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setReqDate(todayStr);
+                      setReqOpen(true);
+                    }}
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    طلب إذن
+                  </Button>
+                )}
+                {pendingToday && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-bold text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400">
+                    <Clock4 className="h-4 w-4" />
+                    طلب الإذن قيد المراجعة
+                  </span>
                 )}
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4 py-6 text-center">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                لم تسجّل حضورك اليوم بعد
-              </p>
+              {pendingToday ? (
+                <div className="flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400">
+                  <Clock4 className="h-4 w-4" />
+                  لديك طلب إذن قيد مراجعة الإدارة — لا يمكنك تسجيل الحضور حتى صدور القرار
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  لم تسجّل حضورك اليوم بعد
+                </p>
+              )}
               <div className="flex flex-wrap justify-center gap-2">
-                <Button onClick={() => mark.mutate({ status: "present", action: "check_in" })} loading={mark.isPending}>
+                <Button
+                  onClick={() => mark.mutate({ status: "present", action: "check_in" })}
+                  loading={mark.isPending}
+                  disabled={pendingToday}
+                >
                   <LogIn className="h-4 w-4" />
                   تسجيل الحضور
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => mark.mutate({ status: "permission", action: "check_in" })}
-                  loading={mark.isPending}
+                  onClick={() => {
+                    setReqDate(todayStr);
+                    setReqOpen(true);
+                  }}
+                  disabled={pendingToday}
                 >
                   <ClipboardList className="h-4 w-4" />
-                  عمل إذن
+                  طلب إذن
                 </Button>
               </div>
             </div>
@@ -215,10 +313,159 @@ export default function AttendancePage() {
       {/* My monthly summary */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryCard title="أيام الحضور" value={myPresent} icon={CalendarCheck} color="bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400" />
-        <SummaryCard title="أيام الإذن" value={myPermission} icon={ClipboardList} color="bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400" />
+        <SummaryCard title="أيام الإذن المعتمدة" value={myPermission} icon={ClipboardList} color="bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400" />
         <SummaryCard title="إجمالي الساعات" value={formatHours(myHours)} icon={Timer} color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400" />
         <SummaryCard title="أيام الشهر المسجلة" value={myMonth.length} icon={CalendarDays} color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400" />
       </div>
+
+      {/* My permission requests this month */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-accent" />
+            طلبات الإذن الخاصة بي — {month}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[600px] text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <th className="pb-3 pr-2 font-semibold">التاريخ</th>
+                <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
+                <th className="pb-3 font-semibold">الملاحظات</th>
+                <th className="pb-3 font-semibold">الحالة</th>
+                <th className="pb-3 font-semibold"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {myRequests.map((r) => (
+                <tr
+                  key={r.id}
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                >
+                  <td className="py-3 pr-2 text-slate-600 dark:text-slate-300">{formatDate(r.date)}</td>
+                  <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                    {r.leave_time
+                      ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
+                      : "—"}
+                  </td>
+                  <td className="py-3 text-slate-500 dark:text-slate-400">{r.notes ?? "—"}</td>
+                  <td className="py-3">
+                    <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-bold", PERMISSION_STATUS_STYLES[r.status])}>
+                      {PERMISSION_LABELS[r.status]}
+                    </span>
+                  </td>
+                  <td className="py-3">
+                    {r.status === "pending" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={() => cancel.mutate(r.id)}
+                        loading={cancel.isPending}
+                      >
+                        <X className="h-4 w-4" />
+                        إلغاء
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {myRequests.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-400">
+                    لا توجد طلبات إذن لهذا الشهر
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+
+      {/* Pending permission requests for management */}
+      {canSeeReport && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-accent" />
+              طلبات الإذن المعلّقة — بانتظار قرارك
+              {pendingRequests.length > 0 && (
+                <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:bg-red-500/15 dark:text-red-400">
+                  {pendingRequests.length}
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <table className="w-full min-w-[700px] text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                  <th className="pb-3 pr-2 font-semibold">الموظف</th>
+                  <th className="pb-3 font-semibold">التاريخ</th>
+                  <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
+                  <th className="pb-3 font-semibold">الملاحظات</th>
+                  <th className="pb-3 font-semibold">القرار</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  >
+                    <td className="py-3 pr-2">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-100">
+                          {r.employee?.full_name ?? "موظف"}
+                        </span>
+                        {r.employee?.role && <RoleBadge role={r.employee.role} />}
+                      </div>
+                    </td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">{formatDate(r.date)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                      {r.leave_time
+                        ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
+                        : "—"}
+                    </td>
+                    <td className="py-3 text-slate-500 dark:text-slate-400">{r.notes ?? "—"}</td>
+                    <td className="py-3">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => review.mutate({ id: r.id, status: "approved" })}
+                          loading={review.isPending}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          موافقة
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600"
+                          onClick={() => review.mutate({ id: r.id, status: "rejected" })}
+                          loading={review.isPending}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          رفض
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {pendingRequests.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-slate-400">
+                      لا توجد طلبات إذن معلّقة حالياً
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Monthly report for managers */}
       {canSeeReport && (
@@ -272,11 +519,59 @@ export default function AttendancePage() {
             <p className="mt-4 text-xs text-slate-400">
               {isDriver
                 ? "سيظهر تقريرك الشهري أعلاه."
-                : "الأيام غير المسجلة لا تُحتسب في أيام الحضور أو الأذن."}
+                : "أيام الإذن تُحتسب فقط بعد موافقة الإدارة على الطلب."}
             </p>
           </CardContent>
         </Card>
       )}
+
+      {/* Permission request modal */}
+      <Modal open={reqOpen} onClose={() => setReqOpen(false)} title="طلب إذن">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            requestPerm.mutate();
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <Label htmlFor="req-date">تاريخ الإذن</Label>
+            <Input
+              id="req-date"
+              type="date"
+              value={reqDate}
+              onChange={(e) => setReqDate(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="req-time">وقت الخروج المتوقع (اختياري)</Label>
+            <Input
+              id="req-time"
+              type="time"
+              value={reqTime}
+              onChange={(e) => setReqTime(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="req-notes">السبب / ملاحظات (اختياري)</Label>
+            <Textarea
+              id="req-notes"
+              value={reqNotes}
+              onChange={(e) => setReqNotes(e.target.value)}
+              placeholder="سبب الإذن..."
+            />
+          </div>
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+            <Button type="button" variant="outline" onClick={() => setReqOpen(false)}>
+              إلغاء
+            </Button>
+            <Button type="submit" loading={requestPerm.isPending}>
+              إرسال الطلب
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import type {
   Attendance,
   AttendanceStatus,
   Notification,
+  PermissionRequest,
+  PermissionStatus,
   Profile,
   Shipment,
   ShipmentLog,
@@ -859,4 +861,92 @@ export async function getAttendanceReport(month: string): Promise<AttendanceRepo
       };
     })
     .sort((a, b) => b.total_days - a.total_days || b.total_hours - a.total_hours);
+}
+
+// ---------------- Permission Requests ----------------
+
+export type PermissionInput = {
+  employee_id: string;
+  date: string;
+  leave_time?: string;
+  notes?: string;
+};
+
+export async function requestPermission(input: PermissionInput): Promise<void> {
+  if (!hasSupabaseEnv) return;
+  const { error } = await db().from("permission_requests").insert(input);
+  if (error) throw new Error(error.message);
+}
+
+export async function getPermissionRequests(
+  month?: string,
+  employeeId?: string
+): Promise<PermissionRequest[]> {
+  if (!hasSupabaseEnv) return [];
+  let q = db()
+    .from("permission_requests")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (month) q = q.gte("date", `${month}-01`).lte("date", `${month}-31`);
+  if (employeeId) q = q.eq("employee_id", employeeId);
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return data as PermissionRequest[];
+}
+
+export async function getPendingPermissionRequests(): Promise<PermissionRequest[]> {
+  if (!hasSupabaseEnv) return [];
+  const { data, error } = await db()
+    .from("permission_requests")
+    .select("*, employee:profiles(full_name, role)")
+    .eq("status", "pending")
+    .order("date", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data as PermissionRequest[];
+}
+
+export async function reviewPermissionRequest(
+  id: string,
+  status: PermissionStatus
+): Promise<void> {
+  if (!hasSupabaseEnv) return;
+  const {
+    data: { session },
+  } = await createClient().auth.getSession();
+  const reviewerId = session?.user.id ?? null;
+  const now = new Date().toISOString();
+  const { error } = await db()
+    .from("permission_requests")
+    .update({ status, reviewed_by: reviewerId, reviewed_at: now })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  if (status !== "approved") return;
+  const { data: req, error: reqErr } = await db()
+    .from("permission_requests")
+    .select("employee_id, date")
+    .eq("id", id)
+    .single();
+  if (reqErr || !req) return;
+  const { data: existing } = await db()
+    .from("attendance")
+    .select("*")
+    .eq("employee_id", req.employee_id)
+    .eq("date", req.date)
+    .maybeSingle();
+  if (existing) {
+    await db()
+      .from("attendance")
+      .update({ status: "permission", updated_at: now })
+      .eq("id", existing.id);
+  } else {
+    await db()
+      .from("attendance")
+      .insert({ employee_id: req.employee_id, date: req.date, status: "permission" });
+  }
+}
+
+export async function cancelPermissionRequest(id: string): Promise<void> {
+  if (!hasSupabaseEnv) return;
+  const { error } = await db().from("permission_requests").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 }

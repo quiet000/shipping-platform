@@ -102,6 +102,19 @@ CREATE TABLE attendance (
     UNIQUE (employee_id, date)
 );
 
+-- 7c. Permission Requests (طلبات الإذن — بموافقة الإدارة)
+CREATE TABLE permission_requests (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+    date DATE NOT NULL,
+    leave_time TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    reviewed_by UUID REFERENCES profiles(id),
+    reviewed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 8. Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
@@ -110,6 +123,7 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shipment_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trucks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE permission_requests ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 --  RLS Policies
@@ -258,8 +272,18 @@ CREATE POLICY "attendance_select_staff" ON attendance
 CREATE POLICY "attendance_insert_own" ON attendance
   FOR INSERT WITH CHECK (auth.uid() = employee_id);
 
+CREATE POLICY "attendance_insert_staff" ON attendance
+  FOR INSERT WITH CHECK (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
+
 CREATE POLICY "attendance_update_own" ON attendance
   FOR UPDATE USING (auth.uid() = employee_id);
+
+CREATE POLICY "attendance_update_staff" ON attendance
+  FOR UPDATE USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
 
 CREATE POLICY "attendance_delete_own" ON attendance
   FOR DELETE USING (auth.uid() = employee_id);
@@ -268,6 +292,26 @@ CREATE POLICY "attendance_all_admin" ON attendance
   FOR ALL USING (
     (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
   );
+
+-- Permission requests: employees create/cancel their own pending, management reviews
+CREATE POLICY "pr_select_own" ON permission_requests
+  FOR SELECT USING (auth.uid() = employee_id);
+
+CREATE POLICY "pr_select_staff" ON permission_requests
+  FOR SELECT USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
+
+CREATE POLICY "pr_insert_own" ON permission_requests
+  FOR INSERT WITH CHECK (auth.uid() = employee_id);
+
+CREATE POLICY "pr_update_staff" ON permission_requests
+  FOR UPDATE USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
+
+CREATE POLICY "pr_delete_own_pending" ON permission_requests
+  FOR DELETE USING (auth.uid() = employee_id AND status = 'pending');
 
 -- ============================================================
 --  Public tracking (anonymous): SECURITY DEFINER RPCs so users
