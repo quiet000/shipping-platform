@@ -20,6 +20,7 @@ import {
   mockShipments,
   mockTrucks,
 } from "@/lib/data/mock";
+import { daysFromNow } from "@/lib/utils";
 
 export type ShipmentInput = {
   waybill_number?: string;
@@ -146,7 +147,7 @@ function ensureWaybill(v?: string): string {
 }
 
 function ensureDeliveryDate(v?: string): string {
-  return v?.trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+  return v?.trim() || daysFromNow(3);
 }
 
 function ensureStatus(v?: ShipmentStatus): ShipmentStatus {

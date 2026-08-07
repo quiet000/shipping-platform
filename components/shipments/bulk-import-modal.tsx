@@ -9,7 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { getAgencies, getDrivers, createShipmentsBulk, type ShipmentInput } from "@/lib/data/api";
-import { generateWaybillNumber } from "@/lib/utils";
+import { generateWaybillNumber, daysFromNow } from "@/lib/utils";
 import type { ShipmentStatus, ShippingType } from "@/lib/types";
 
 interface Props {
@@ -75,7 +75,7 @@ function excelDateToISO(value: unknown): string {
     if (d) return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
   }
   const s = String(value ?? "").trim();
-  if (!s) return new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+  if (!s) return daysFromNow(3);
   const parsed = new Date(s);
   if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
   return new Date().toISOString().slice(0, 10);

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { getAgencies, getDrivers, createShipment, type ShipmentInput } from "@/lib/data/api";
-import { generateWaybillNumber, daysUntil } from "@/lib/utils";
+import { generateWaybillNumber, daysUntil, daysFromNow } from "@/lib/utils";
 import { STATUS_LABELS, SHIPPING_TYPE_LABELS, type ShipmentStatus, type ShippingType } from "@/lib/types";
 
 interface Props {
@@ -32,7 +32,7 @@ const empty: Omit<ShipmentInput, "expected_delivery_date"> & {
   assigned_driver_id: "",
   price: 0,
   cod_amount: 0,
-  expected_delivery_date: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+  expected_delivery_date: daysFromNow(3),
 };
 
 export function AddShipmentModal({ open, onClose }: Props) {
@@ -134,9 +134,6 @@ export function AddShipmentModal({ open, onClose }: Props) {
               <option value="no">غير قابلة للكسر</option>
               <option value="yes">قابلة للكسر</option>
             </Select>
-            <p className="mt-1 text-[11px] text-slate-400">
-              الافتراضي: غير قابلة للكسر
-            </p>
           </div>
 
           <div>

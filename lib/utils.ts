@@ -49,6 +49,14 @@ export function daysUntil(date: string | Date) {
   return Math.ceil((target.getTime() - today.getTime()) / 86400000);
 }
 
+export function daysFromNow(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 export function generateWaybillNumber() {
   const n = Math.floor(100000 + Math.random() * 900000);
   return `SHP-${n}`;
