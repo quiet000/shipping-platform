@@ -150,13 +150,16 @@ export default function AttendancePage() {
 
   const requestPerm = useMutation({
     mutationFn: async () => {
-      const leave_time = reqTime
-        ? new Date(`${reqDate}T${reqTime}:00`).toISOString()
-        : undefined;
+      if (!reqTime) throw new Error("حدد وقت الخروج المتوقع أولاً");
+      const leaveDate = new Date(`${reqDate}T${reqTime}:00`);
+      const minTime = new Date(Date.now() + 30 * 60 * 1000);
+      if (Number.isNaN(leaveDate.getTime()) || leaveDate.getTime() < minTime.getTime()) {
+        throw new Error("يجب تقديم طلب الإذن قبل موعد المغادرة بـ 30 دقيقة على الأقل");
+      }
       await requestPermission({
         employee_id: user!.id,
         date: reqDate,
-        leave_time,
+        leave_time: leaveDate.toISOString(),
         notes: reqNotes.trim() || undefined,
       });
     },
@@ -545,13 +548,17 @@ export default function AttendancePage() {
             />
           </div>
           <div>
-            <Label htmlFor="req-time">وقت الخروج المتوقع (اختياري)</Label>
+            <Label htmlFor="req-time">وقت الخروج المتوقع</Label>
             <Input
               id="req-time"
               type="time"
               value={reqTime}
               onChange={(e) => setReqTime(e.target.value)}
+              required
             />
+            <p className="mt-1 text-[11px] text-slate-400">
+              يُقبل الطلب قبل موعد المغادرة بـ 30 دقيقة على الأقل
+            </p>
           </div>
           <div>
             <Label htmlFor="req-notes">السبب / ملاحظات (اختياري)</Label>

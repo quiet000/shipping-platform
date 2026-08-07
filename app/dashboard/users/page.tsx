@@ -10,6 +10,7 @@ import {
   Trash2,
   Check,
   KeyRound,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -299,15 +300,25 @@ function ResetPasswordModal({
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
+    const clean = password.trim();
+    if (clean.length < 6) {
       toast.error("كلمة المرور يجب ألا تقل عن 6 أحرف");
       return;
     }
-    if (password !== confirm) {
+    if (clean !== confirm.trim()) {
       toast.error("كلمتا المرور غير متطابقتين");
       return;
     }
-    onSave(password);
+    onSave(clean);
+  };
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(password.trim());
+      toast.success("تم نسخ كلمة المرور");
+    } catch {
+      toast.error("تعذر النسخ");
+    }
   };
 
   return (
@@ -318,18 +329,39 @@ function ResetPasswordModal({
       className="max-w-md"
     >
       <form onSubmit={submit} className="space-y-4">
+        {profile && (
+          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+            <KeyRound className="h-4 w-4 flex-shrink-0" />
+            <span>
+              الحساب: <span dir="ltr" className="font-mono font-bold">{profile.email}</span>
+            </span>
+          </div>
+        )}
         <div>
-          <Label>كلمة المرور الجديدة</Label>
+          <div className="flex items-center justify-between">
+            <Label>كلمة المرور الجديدة</Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={copyPassword}
+              disabled={!password.trim()}
+            >
+              <Copy className="h-3.5 w-3.5" />
+              نسخ
+            </Button>
+          </div>
           <Input
             dir="ltr"
             type="text"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
           />
           <p className="mt-1 text-[11px] text-slate-400">
-            ستُسلمها للموظف، وسيستخدمها عند الدخول التالي.
+            تُنسخ الكلمة كما هي دون أي مسافات، وسيستخدمها الموظف عند الدخول التالي.
           </p>
         </div>
         <div>
@@ -337,11 +369,16 @@ function ResetPasswordModal({
           <Input
             dir="ltr"
             type="text"
+            autoComplete="off"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="••••••••"
             required
           />
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+          عند الحفظ تُبطَل الجلسات المفتوحة للموظف فوراً، وتنتهي صلاحية كلمة المرور القديمة. تأكد من
+          تسليمه الكلمة الجديدة بالضبط (انقر «نسخ» إن أردت).
         </div>
         <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
           <Button type="button" variant="outline" onClick={onClose}>

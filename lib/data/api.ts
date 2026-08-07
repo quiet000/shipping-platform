@@ -868,7 +868,7 @@ export async function getAttendanceReport(month: string): Promise<AttendanceRepo
 export type PermissionInput = {
   employee_id: string;
   date: string;
-  leave_time?: string;
+  leave_time: string;
   notes?: string;
 };
 

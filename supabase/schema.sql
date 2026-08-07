@@ -302,16 +302,54 @@ CREATE POLICY "pr_select_staff" ON permission_requests
     (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
   );
 
+DROP POLICY IF EXISTS "pr_insert_own" ON permission_requests;
 CREATE POLICY "pr_insert_own" ON permission_requests
-  FOR INSERT WITH CHECK (auth.uid() = employee_id);
+  FOR INSERT WITH CHECK (
+    auth.uid() = employee_id
+    AND leave_time IS NOT NULL
+    AND leave_time >= now() + interval '30 minutes'
+  );
 
+DROP POLICY IF EXISTS "pr_update_staff" ON permission_requests;
 CREATE POLICY "pr_update_staff" ON permission_requests
   FOR UPDATE USING (
     (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
   );
 
+DROP POLICY IF EXISTS "pr_delete_own_pending" ON permission_requests;
 CREATE POLICY "pr_delete_own_pending" ON permission_requests
   FOR DELETE USING (auth.uid() = employee_id AND status = 'pending');
+
+-- Any submitted permission request instantly notifies management.
+CREATE OR REPLACE FUNCTION public.notify_permission_request()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_name TEXT;
+  v_lt TEXT;
+BEGIN
+  SELECT full_name INTO v_name FROM profiles WHERE id = NEW.employee_id;
+  v_lt := CASE WHEN NEW.leave_time IS NULL THEN ''
+               ELSE to_char(NEW.leave_time, 'HH24:MI') END;
+  INSERT INTO notifications (title, message, alert_type)
+  VALUES (
+    'طلب إذن جديد',
+    COALESCE(v_name, 'موظف') || ' يطلب إذن خروج'
+      || CASE WHEN v_lt = '' THEN '' ELSE ' في ' || v_lt END
+      || ' بتاريخ ' || to_char(NEW.date, 'YYYY-MM-DD'),
+    'warning'
+  );
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_notify_permission_request ON permission_requests;
+CREATE TRIGGER trg_notify_permission_request
+  AFTER INSERT ON permission_requests
+  FOR EACH ROW EXECUTE FUNCTION public.notify_permission_request();
 
 -- ============================================================
 --  Public tracking (anonymous): SECURITY DEFINER RPCs so users
