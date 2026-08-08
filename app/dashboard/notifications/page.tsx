@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   AlertTriangle,
@@ -11,6 +12,7 @@ import {
   RefreshCcw,
   CalendarClock,
   Package,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,9 +29,11 @@ import {
 import { cn, formatDateTime, daysUntil, formatDate } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ALERT_STYLES, ALERT_ICON_COLORS, STATUS_LABELS, type ShipmentStatus } from "@/lib/types";
+import { PERMISSION_NOTIFICATION_TITLE } from "@/lib/constants";
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { user } = useAuth();
   const driverId = user?.role === "driver" ? user.id : undefined;
   const [filter, setFilter] = useState("all");
@@ -123,7 +127,10 @@ export default function NotificationsPage() {
               {filtered.map((n) => (
                 <button
                   key={n.id}
-                  onClick={() => markNotificationRead(n.id).then(() => queryClient.invalidateQueries({ queryKey: ["notifications", driverId] }))}
+                  onClick={() => {
+                    markNotificationRead(n.id).then(() => queryClient.invalidateQueries({ queryKey: ["notifications", driverId] }));
+                    if (n.title === PERMISSION_NOTIFICATION_TITLE) router.push("/dashboard/attendance");
+                  }}
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl border p-4 text-right transition hover:bg-slate-50 dark:hover:bg-slate-800/60",
                     n.is_read
@@ -144,6 +151,12 @@ export default function NotificationsPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{n.message}</p>
+                    {n.title === PERMISSION_NOTIFICATION_TITLE && (
+                      <p className="mt-2 inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                        اضغط للانتقال إلى الطلب المعلّق واتخاذ القرار
+                        <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
+                      </p>
+                    )}
                     {n.shipment && (
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                         <span className="font-bold tracking-wider text-navy-900 dark:text-white ltr">

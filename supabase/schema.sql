@@ -336,10 +336,10 @@ BEGIN
                ELSE to_char(NEW.leave_time, 'HH24:MI') END;
   INSERT INTO notifications (title, message, alert_type)
   VALUES (
-    'طلب إذن جديد',
-    COALESCE(v_name, 'موظف') || ' يطلب إذن خروج'
-      || CASE WHEN v_lt = '' THEN '' ELSE ' في ' || v_lt END
-      || ' بتاريخ ' || to_char(NEW.date, 'YYYY-MM-DD'),
+    U&'\0637\0644\0628 \0625\0630\0646 \062c\062f\064a\062f',
+    COALESCE(v_name, U&'\0645\0648\0638\0641') || U&' \064a\0637\0644\0628 \0625\0630\0646 \062e\0631\0648\062c'
+      || CASE WHEN v_lt = '' THEN '' ELSE U&' \0641\064a ' || v_lt END
+      || U&' \0628\062a\0627\0631\064a\062e ' || to_char(NEW.date, 'YYYY-MM-DD'),
     'warning'
   );
   RETURN NEW;

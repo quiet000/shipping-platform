@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
@@ -18,10 +19,12 @@ import {
   markAllNotificationsRead,
 } from "@/lib/data/api";
 import { ALERT_STYLES, ALERT_ICON_COLORS } from "@/lib/types";
+import { PERMISSION_NOTIFICATION_TITLE } from "@/lib/constants";
 import { useAuth } from "@/lib/auth";
 
 export function NotificationsBell() {
   const { user } = useAuth();
+  const router = useRouter();
   const driverId = user?.role === "driver" ? user.id : undefined;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -95,7 +98,12 @@ export function NotificationsBell() {
               notifications.slice(0, 8).map((n) => (
                 <button
                   key={n.id}
-                  onClick={() => markRead(n.id)}
+                  onClick={() => {
+                    markRead(n.id);
+                    if (n.title === PERMISSION_NOTIFICATION_TITLE) {
+                      router.push("/dashboard/attendance");
+                    }
+                  }}
                   className={cn(
                     "flex w-full items-start gap-3 border-b border-slate-100 p-3 text-right transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800",
                     !n.is_read && "bg-blue-50/60 dark:bg-blue-500/5"
@@ -111,6 +119,11 @@ export function NotificationsBell() {
                     <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
                       {n.message}
                     </p>
+                    {n.title === PERMISSION_NOTIFICATION_TITLE && (
+                      <p className="mt-1 text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                        اضغط للانتقال إلى الطلب المعلّق
+                      </p>
+                    )}
                     <p className="mt-1 text-[10px] text-slate-400">{formatTimeAgo(n.created_at)}</p>
                   </div>
                 </button>
