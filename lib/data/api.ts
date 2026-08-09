@@ -1,20 +1,22 @@
 "use client";
 
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
-import type {
-  Agency,
-  Attendance,
-  AttendanceStatus,
-  Notification,
-  PermissionRequest,
-  PermissionStatus,
-  Profile,
-  Shipment,
-  ShipmentLog,
-  ShipmentStatus,
-  ShippingType,
-  Truck,
-  UserRole,
+import {
+  PERMISSION_DURATION_LABELS,
+  type Agency,
+  type Attendance,
+  type AttendanceStatus,
+  type Notification,
+  type PermissionDuration,
+  type PermissionRequest,
+  type PermissionStatus,
+  type Profile,
+  type Shipment,
+  type ShipmentLog,
+  type ShipmentStatus,
+  type ShippingType,
+  type Truck,
+  type UserRole,
 } from "@/lib/types";
 import {
   mockAgencies,
@@ -950,4 +952,118 @@ export async function cancelPermissionRequest(id: string): Promise<void> {
   if (!hasSupabaseEnv) return;
   const { error } = await db().from("permission_requests").delete().eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+// ---------------- Activity Log ----------------
+
+export type ActivityLogType =
+  | "check_in"
+  | "check_out"
+  | "permission_requested"
+  | "permission_approved"
+  | "permission_rejected";
+
+export type ActivityLogEntry = {
+  key: string;
+  employee_id: string;
+  full_name: string;
+  role: string | null;
+  type: ActivityLogType;
+  at: string;
+  date: string;
+  detail?: string;
+};
+
+export async function getActivityLog(month: string): Promise<ActivityLogEntry[]> {
+  if (!hasSupabaseEnv) return [];
+  const start = `${month}-01`;
+  const end = `${month}-31`;
+  const entries: ActivityLogEntry[] = [];
+
+  const { data: attendance, error: aErr } = await db()
+    .from("attendance")
+    .select("*, employee:profiles(full_name, role)")
+    .gte("date", start)
+    .lte("date", end);
+  if (aErr) throw new Error(aErr.message);
+  for (const a of (attendance ?? []) as Array<
+    Attendance & { employee?: Pick<Profile, "full_name" | "role"> | null }
+  >) {
+    const name = a.employee?.full_name ?? "موظف";
+    if (a.check_in) {
+      entries.push({
+        key: `in-${a.id}`,
+        employee_id: a.employee_id,
+        full_name: name,
+        role: a.employee?.role ?? null,
+        type: "check_in",
+        at: a.check_in,
+        date: a.date,
+      });
+    }
+    if (a.check_out) {
+      entries.push({
+        key: `out-${a.id}`,
+        employee_id: a.employee_id,
+        full_name: name,
+        role: a.employee?.role ?? null,
+        type: "check_out",
+        at: a.check_out,
+        date: a.date,
+      });
+    }
+  }
+
+  const { data: perms, error: pErr } = await db()
+    .from("permission_requests")
+    .select("*, employee:profiles!permission_requests_employee_id_fkey(full_name, role)")
+    .gte("date", start)
+    .lte("date", end);
+  if (pErr) throw new Error(pErr.message);
+  for (const p of (perms ?? []) as Array<
+    PermissionRequest & { employee?: Pick<Profile, "full_name" | "role"> | null }
+  >) {
+    const name = p.employee?.full_name ?? "موظف";
+    const dur = p.duration
+      ? PERMISSION_DURATION_LABELS[p.duration as PermissionDuration] ?? p.duration
+      : undefined;
+    if (p.created_at) {
+      entries.push({
+        key: `pr-req-${p.id}`,
+        employee_id: p.employee_id,
+        full_name: name,
+        role: p.employee?.role ?? null,
+        type: "permission_requested",
+        at: p.created_at,
+        date: p.date,
+        detail: dur,
+      });
+    }
+    if (p.reviewed_at && p.status === "approved") {
+      entries.push({
+        key: `pr-ok-${p.id}`,
+        employee_id: p.employee_id,
+        full_name: name,
+        role: p.employee?.role ?? null,
+        type: "permission_approved",
+        at: p.reviewed_at,
+        date: p.date,
+        detail: dur,
+      });
+    }
+    if (p.reviewed_at && p.status === "rejected") {
+      entries.push({
+        key: `pr-no-${p.id}`,
+        employee_id: p.employee_id,
+        full_name: name,
+        role: p.employee?.role ?? null,
+        type: "permission_rejected",
+        at: p.reviewed_at,
+        date: p.date,
+        detail: dur,
+      });
+    }
+  }
+
+  return entries.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
 }
