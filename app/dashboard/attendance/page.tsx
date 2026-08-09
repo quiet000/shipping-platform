@@ -35,7 +35,14 @@ import {
   cancelPermissionRequest,
 } from "@/lib/data/api";
 import { cn, formatDateTime, formatDate, daysFromNow } from "@/lib/utils";
-import { ATTENDANCE_LABELS, PERMISSION_LABELS, type AttendanceStatus } from "@/lib/types";
+import {
+  ATTENDANCE_LABELS,
+  PERMISSION_LABELS,
+  PERMISSION_DURATION_LABELS,
+  PERMISSION_DURATION_OPTIONS,
+  type AttendanceStatus,
+  type PermissionDuration,
+} from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 
 const REPORT_ROLES = ["admin", "supervisor", "branch_manager", "accountant"];
@@ -92,6 +99,7 @@ export default function AttendancePage() {
   const [reqOpen, setReqOpen] = useState(false);
   const [reqDate, setReqDate] = useState(todayStr);
   const [reqTime, setReqTime] = useState("");
+  const [reqDuration, setReqDuration] = useState<PermissionDuration>("1hour");
   const [reqNotes, setReqNotes] = useState("");
 
   const { data: today = null } = useQuery({
@@ -160,6 +168,7 @@ export default function AttendancePage() {
         employee_id: user!.id,
         date: reqDate,
         leave_time: leaveDate.toISOString(),
+        duration: reqDuration,
         notes: reqNotes.trim() || undefined,
       });
     },
@@ -167,6 +176,7 @@ export default function AttendancePage() {
       toast.success("تم إرسال طلب الإذن بانتظار موافقة الإدارة");
       setReqOpen(false);
       setReqTime("");
+      setReqDuration("1hour");
       setReqNotes("");
       invalidate();
     },
@@ -335,6 +345,7 @@ export default function AttendancePage() {
               <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">التاريخ</th>
                 <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
+                <th className="pb-3 font-semibold">المدة</th>
                 <th className="pb-3 font-semibold">الملاحظات</th>
                 <th className="pb-3 font-semibold">الحالة</th>
                 <th className="pb-3 font-semibold"></th>
@@ -351,6 +362,9 @@ export default function AttendancePage() {
                     {r.leave_time
                       ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
                       : "—"}
+                  </td>
+                  <td className="py-3 text-slate-600 dark:text-slate-300">
+                    {r.duration ? PERMISSION_DURATION_LABELS[r.duration as PermissionDuration] ?? r.duration : "—"}
                   </td>
                   <td className="py-3 text-slate-500 dark:text-slate-400">{r.notes ?? "—"}</td>
                   <td className="py-3">
@@ -376,7 +390,7 @@ export default function AttendancePage() {
               ))}
               {myRequests.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400">
+                  <td colSpan={6} className="py-8 text-center text-slate-400">
                     لا توجد طلبات إذن لهذا الشهر
                   </td>
                 </tr>
@@ -407,6 +421,7 @@ export default function AttendancePage() {
                   <th className="pb-3 pr-2 font-semibold">الموظف</th>
                   <th className="pb-3 font-semibold">التاريخ</th>
                   <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
+                  <th className="pb-3 font-semibold">المدة</th>
                   <th className="pb-3 font-semibold">الملاحظات</th>
                   <th className="pb-3 font-semibold">القرار</th>
                 </tr>
@@ -430,6 +445,9 @@ export default function AttendancePage() {
                       {r.leave_time
                         ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
                         : "—"}
+                    </td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">
+                      {r.duration ? PERMISSION_DURATION_LABELS[r.duration as PermissionDuration] ?? r.duration : "—"}
                     </td>
                     <td className="py-3 text-slate-500 dark:text-slate-400">{r.notes ?? "—"}</td>
                     <td className="py-3">
@@ -459,7 +477,7 @@ export default function AttendancePage() {
                 ))}
                 {pendingRequests.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400">
+                    <td colSpan={6} className="py-8 text-center text-slate-400">
                       لا توجد طلبات إذن معلّقة حالياً
                     </td>
                   </tr>
@@ -559,6 +577,26 @@ export default function AttendancePage() {
             <p className="mt-1 text-[11px] text-slate-400">
               يُقبل الطلب قبل موعد المغادرة بـ 30 دقيقة على الأقل
             </p>
+          </div>
+          <div>
+            <Label>مدة الإذن</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {PERMISSION_DURATION_OPTIONS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setReqDuration(d)}
+                  className={cn(
+                    "rounded-lg border px-3 py-2 text-sm font-semibold transition",
+                    reqDuration === d
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-500/15 dark:text-blue-300"
+                      : "border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300"
+                  )}
+                >
+                  {PERMISSION_DURATION_LABELS[d]}
+                </button>
+              ))}
+            </div>
           </div>
           <div>
             <Label htmlFor="req-notes">السبب / ملاحظات (اختياري)</Label>

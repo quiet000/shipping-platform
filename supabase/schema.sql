@@ -108,6 +108,7 @@ CREATE TABLE permission_requests (
     employee_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
     date DATE NOT NULL,
     leave_time TIMESTAMP WITH TIME ZONE,
+    duration VARCHAR(20) CHECK (duration IN ('1hour', '2hours', 'rest_of_day')),
     notes TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     reviewed_by UUID REFERENCES profiles(id),
@@ -330,14 +331,21 @@ AS $$
 DECLARE
   v_name TEXT;
   v_lt TEXT;
+  v_dur TEXT;
 BEGIN
   SELECT full_name INTO v_name FROM profiles WHERE id = NEW.employee_id;
   v_lt := CASE WHEN NEW.leave_time IS NULL THEN ''
                ELSE to_char(NEW.leave_time, 'HH24:MI') END;
+  v_dur := CASE NEW.duration
+             WHEN '1hour' THEN U&'\0633\0627\0639\0629 \0648\0627\062d\062f\0629'
+             WHEN '2hours' THEN U&'\0633\0627\0639\062a\0627\0646'
+             WHEN 'rest_of_day' THEN U&'\0628\0627\0642\064a \0627\0644\064a\0648\0645'
+             ELSE '' END;
   INSERT INTO notifications (title, message, alert_type)
   VALUES (
     U&'\0637\0644\0628 \0625\0630\0646 \062c\062f\064a\062f',
     COALESCE(v_name, U&'\0645\0648\0638\0641') || U&' \064a\0637\0644\0628 \0625\0630\0646 \062e\0631\0648\062c'
+      || CASE WHEN v_dur = '' THEN '' ELSE U&' \0028' || v_dur || U&'\0029' END
       || CASE WHEN v_lt = '' THEN '' ELSE U&' \0641\064a ' || v_lt END
       || U&' \0628\062a\0627\0631\064a\062e ' || to_char(NEW.date, 'YYYY-MM-DD'),
     'warning'

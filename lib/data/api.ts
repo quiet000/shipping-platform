@@ -869,6 +869,7 @@ export type PermissionInput = {
   employee_id: string;
   date: string;
   leave_time: string;
+  duration: string;
   notes?: string;
 };
 

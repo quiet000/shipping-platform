@@ -100,11 +100,14 @@ export interface Attendance {
 
 export type PermissionStatus = "pending" | "approved" | "rejected";
 
+export type PermissionDuration = "1hour" | "2hours" | "rest_of_day";
+
 export interface PermissionRequest {
   id: string;
   employee_id: string;
   date: string;
   leave_time?: string | null;
+  duration?: string | null;
   notes?: string | null;
   status: PermissionStatus;
   reviewed_by?: string | null;
@@ -123,6 +126,18 @@ export const PERMISSION_LABELS: Record<PermissionStatus, string> = {
   approved: "موافَق عليه",
   rejected: "مرفوض",
 };
+
+export const PERMISSION_DURATION_LABELS: Record<PermissionDuration, string> = {
+  "1hour": "ساعة واحدة",
+  "2hours": "ساعتان",
+  rest_of_day: "باقي اليوم",
+};
+
+export const PERMISSION_DURATION_OPTIONS: PermissionDuration[] = [
+  "1hour",
+  "2hours",
+  "rest_of_day",
+];
 
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   in_warehouse: "في المخزن",
