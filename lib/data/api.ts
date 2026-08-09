@@ -898,7 +898,7 @@ export async function getPendingPermissionRequests(): Promise<PermissionRequest[
   if (!hasSupabaseEnv) return [];
   const { data, error } = await db()
     .from("permission_requests")
-    .select("*, employee:profiles(full_name, role)")
+    .select("*, employee:profiles!permission_requests_employee_id_fkey(full_name, role)")
     .eq("status", "pending")
     .order("date", { ascending: true });
   if (error) throw new Error(error.message);
