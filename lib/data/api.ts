@@ -1266,9 +1266,9 @@ export async function getReportsData(start: string, end: string): Promise<Report
   return {
     attendance: attendanceRows,
     permissions: permissionRows,
-    shipments: shipmentRows.sort(
-      (a, b) => b.collected_revenue - a.collected_revenue || b.total - a.total
-    ),
+    shipments: shipmentRows
+      .filter((r) => r.role === "driver")
+      .sort((a, b) => b.collected_revenue - a.collected_revenue || b.total - a.total),
     summary: {
       employees: profiles.length,
       drivers: profiles.filter((p) => p.role === "driver").length,

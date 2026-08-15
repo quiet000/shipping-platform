@@ -13,20 +13,55 @@ import {
   UserCheck,
   ClipboardList,
   FileBarChart,
+  Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/ui/badge";
-import { getReportsData } from "@/lib/data/api";
+import {
+  getReportsData,
+  type ReportAttendanceRow,
+  type ReportPermissionRow,
+  type ReportShipmentRow,
+} from "@/lib/data/api";
 import { cn, formatCurrency } from "@/lib/utils";
-import type { UserRole } from "@/lib/types";
+import { ROLE_LABELS, type UserRole } from "@/lib/types";
 
 type PeriodMode = "monthly" | "yearly";
 
 function currentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function escapeCsv(value: string | number | null | undefined): string {
+  const s = String(value ?? "");
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
+  const csv = "\uFEFF" + rows.map((r) => r.map(escapeCsv).join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function roleLabel(role: string | null): string {
+  return role && ROLE_LABELS[role as UserRole] ? ROLE_LABELS[role as UserRole] : role ?? "";
+}
+
+function hoursText(h: number) {
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  return mm > 0 ? `${hh} س ${mm} د` : `${hh} س`;
 }
 
 function KpiCard({
@@ -75,6 +110,65 @@ export default function ReportsPage() {
 
   const s = report?.summary;
   const periodLabel = mode === "monthly" ? month : year;
+
+  const buildAttendanceRows = (): (string | number | null | undefined)[][] => [
+    ["الموظف", "الدور", "أيام الحضور", "أيام الإذن", "إجمالي الأيام", "ساعات العمل", "متوسط الحضور"],
+    ...(report?.attendance ?? []).map((r) => [
+      r.full_name,
+      roleLabel(r.role),
+      r.present_days,
+      r.permission_days,
+      r.total_days,
+      hoursText(r.total_hours),
+      r.avg_check_in ?? "—",
+    ]),
+  ];
+
+  const buildPermissionRows = (): (string | number | null | undefined)[][] => [
+    ["الموظف", "الدور", "الطلبات", "موافَق عليها", "مرفوضة", "معلّقة", "ساعات الإذن"],
+    ...(report?.permissions ?? []).map((r) => [
+      r.full_name,
+      roleLabel(r.role),
+      r.requested,
+      r.approved,
+      r.rejected,
+      r.pending,
+      r.hours_requested,
+    ]),
+  ];
+
+  const buildShipmentRows = (): (string | number | null | undefined)[][] => [
+    ["الموظف", "الدور", "أيام العمل", "الشحنات", "تم التسليم", "مرتجع", "قيد التنفيذ", "نسبة التسليم", "الإيراد المتوقع", "الإيراد المحصّل", "الفاقد"],
+    ...(report?.shipments ?? []).map((r) => [
+      r.full_name,
+      roleLabel(r.role),
+      r.days_worked,
+      r.total,
+      r.delivered,
+      r.returned,
+      r.pending,
+      r.delivery_rate !== null ? `${r.delivery_rate}%` : "—",
+      formatCurrency(r.expected_revenue),
+      formatCurrency(r.collected_revenue),
+      formatCurrency(r.lost_revenue),
+    ]),
+  ];
+
+  const downloadFull = () => {
+    const periodText = `الفترة: ${periodLabel} (${period.start} إلى ${period.end})`;
+    const rows: (string | number | null | undefined)[][] = [];
+    rows.push([periodText]);
+    rows.push([]);
+    rows.push(["تقرير الحضور"]);
+    rows.push(...buildAttendanceRows());
+    rows.push([]);
+    rows.push(["تقرير الإذونات"]);
+    rows.push(...buildPermissionRows());
+    rows.push([]);
+    rows.push(["تقرير الشحنات حسب المندوب"]);
+    rows.push(...buildShipmentRows());
+    downloadCsv(`reports-${periodLabel}.csv`, rows);
+  };
 
   return (
     <div className="space-y-6">
@@ -127,6 +221,10 @@ export default function ReportsPage() {
               />
             </div>
           )}
+          <Button variant="accent" onClick={downloadFull}>
+            <Download className="h-4 w-4" />
+            تحميل التقرير
+          </Button>
         </div>
       </div>
 
@@ -180,6 +278,10 @@ export default function ReportsPage() {
             <CalendarRange className="h-5 w-5 text-accent" />
             تقرير الحضور — {periodLabel}
           </CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => downloadCsv(`attendance-${periodLabel}.csv`, buildAttendanceRows())}>
+            <Download className="h-4 w-4" />
+            تحميل CSV
+          </Button>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
@@ -232,6 +334,10 @@ export default function ReportsPage() {
             <ClipboardList className="h-5 w-5 text-accent" />
             تقرير الإذونات — {periodLabel}
           </CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => downloadCsv(`permissions-${periodLabel}.csv`, buildPermissionRows())}>
+            <Download className="h-4 w-4" />
+            تحميل CSV
+          </Button>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
@@ -285,12 +391,16 @@ export default function ReportsPage() {
             <FileBarChart className="h-5 w-5 text-accent" />
             تقرير الشحنات حسب المندوب — {periodLabel}
           </CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => downloadCsv(`shipments-${periodLabel}.csv`, buildShipmentRows())}>
+            <Download className="h-4 w-4" />
+            تحميل CSV
+          </Button>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[1000px] text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <th className="pb-3 pr-2 font-semibold">الموظف</th>
+                <th className="pb-3 pr-2 font-semibold">المندوب</th>
                 <th className="pb-3 font-semibold">أيام العمل</th>
                 <th className="pb-3 font-semibold">الشحنات</th>
                 <th className="pb-3 font-semibold">تم التسليم</th>
