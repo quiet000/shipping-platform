@@ -1067,3 +1067,223 @@ export async function getActivityLog(month: string): Promise<ActivityLogEntry[]>
 
   return entries.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
 }
+
+// ---------------- Reports ----------------
+
+export type ReportAttendanceRow = {
+  employee_id: string;
+  full_name: string;
+  role: string | null;
+  present_days: number;
+  permission_days: number;
+  total_days: number;
+  total_hours: number;
+  avg_check_in: string | null;
+};
+
+export type ReportPermissionRow = {
+  employee_id: string;
+  full_name: string;
+  role: string | null;
+  requested: number;
+  approved: number;
+  rejected: number;
+  pending: number;
+  hours_requested: number;
+};
+
+export type ReportShipmentRow = {
+  employee_id: string;
+  full_name: string;
+  role: string | null;
+  total: number;
+  delivered: number;
+  returned: number;
+  pending: number;
+  delivery_rate: number | null;
+  expected_revenue: number;
+  collected_revenue: number;
+  lost_revenue: number;
+  days_worked: number;
+};
+
+export type ReportsData = {
+  attendance: ReportAttendanceRow[];
+  permissions: ReportPermissionRow[];
+  shipments: ReportShipmentRow[];
+  summary: {
+    employees: number;
+    drivers: number;
+    total_shipments: number;
+    delivered: number;
+    returned: number;
+    pending_shipments: number;
+    delivery_rate: number | null;
+    attendance_days: number;
+    permission_days: number;
+    expected_revenue: number;
+    collected_revenue: number;
+    lost_revenue: number;
+  };
+};
+
+export async function getReportsData(start: string, end: string): Promise<ReportsData> {
+  const empty: ReportsData = {
+    attendance: [],
+    permissions: [],
+    shipments: [],
+    summary: {
+      employees: 0,
+      drivers: 0,
+      total_shipments: 0,
+      delivered: 0,
+      returned: 0,
+      pending_shipments: 0,
+      delivery_rate: null,
+      attendance_days: 0,
+      permission_days: 0,
+      expected_revenue: 0,
+      collected_revenue: 0,
+      lost_revenue: 0,
+    },
+  };
+  if (!hasSupabaseEnv) return empty;
+
+  const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
+  const shipments = await getShipments();
+
+  const [attRes, permRes, logRes] = await Promise.all([
+    db()
+      .from("attendance")
+      .select("*, employee:profiles(full_name, role)")
+      .gte("date", start)
+      .lte("date", end),
+    db()
+      .from("permission_requests")
+      .select("*, employee:profiles!permission_requests_employee_id_fkey(full_name, role)")
+      .gte("date", start)
+      .lte("date", end),
+    db().from("shipment_logs").select("created_by, created_at").limit(5000),
+  ]);
+  if (attRes.error) throw new Error(attRes.error.message);
+  if (permRes.error) throw new Error(permRes.error.message);
+  if (logRes.error) throw new Error(logRes.error.message);
+
+  const attendance = (attRes.data ?? []) as Array<
+    Attendance & { employee?: Pick<Profile, "full_name" | "role"> | null }
+  >;
+  const perms = (permRes.data ?? []) as Array<
+    PermissionRequest & { employee?: Pick<Profile, "full_name" | "role"> | null }
+  >;
+  const logs = (logRes.data ?? []) as { created_by: string | null; created_at: string }[];
+
+  const inPeriod = (d?: string | null) => !!d && d.slice(0, 10) >= start && d.slice(0, 10) <= end;
+  const periodShipments = shipments.filter((s) => inPeriod(s.created_at));
+  const revenue = (list: Shipment[]) =>
+    list.reduce((acc, s) => acc + (s.price || 0) + (s.cod_amount || 0), 0);
+
+  const attendanceRows: ReportAttendanceRow[] = profiles.map((p) => {
+    const mine = attendance.filter((a) => a.employee_id === p.id);
+    const withTimes = mine.filter((a) => a.check_in);
+    const avgIn =
+      withTimes.length > 0
+        ? withTimes.reduce((s, a) => s + new Date(a.check_in!).getTime(), 0) / withTimes.length
+        : null;
+    const total_hours = mine.reduce(
+      (acc, a) =>
+        acc +
+        (a.check_in && a.check_out
+          ? Math.max(0, (new Date(a.check_out).getTime() - new Date(a.check_in).getTime()) / 3600000)
+          : 0),
+      0
+    );
+    return {
+      employee_id: p.id,
+      full_name: p.full_name,
+      role: p.role,
+      present_days: mine.filter((a) => a.status === "present").length,
+      permission_days: mine.filter((a) => a.status === "permission").length,
+      total_days: mine.length,
+      total_hours,
+      avg_check_in: avgIn
+        ? new Intl.DateTimeFormat("ar-EG", { hour: "2-digit", minute: "2-digit" }).format(
+            new Date(avgIn)
+          )
+        : null,
+    };
+  });
+
+  const permissionRows: ReportPermissionRow[] = profiles.map((p) => {
+    const mine = perms.filter((r) => r.employee_id === p.id);
+    const hours = mine.reduce(
+      (acc, r) =>
+        acc +
+        (r.duration === "1hour" ? 1 : r.duration === "2hours" ? 2 : r.duration === "rest_of_day" ? 8 : 0),
+      0
+    );
+    return {
+      employee_id: p.id,
+      full_name: p.full_name,
+      role: p.role,
+      requested: mine.length,
+      approved: mine.filter((r) => r.status === "approved").length,
+      rejected: mine.filter((r) => r.status === "rejected").length,
+      pending: mine.filter((r) => r.status === "pending").length,
+      hours_requested: hours,
+    };
+  });
+
+  const shipmentRows: ReportShipmentRow[] = profiles.map((p) => {
+    const assigned = periodShipments.filter((s) => s.assigned_driver_id === p.id);
+    const delivered = assigned.filter((s) => s.status === "delivered");
+    const returned = assigned.filter((s) => s.status === "returned");
+    const closed = delivered.length + returned.length;
+    const days = new Set(
+      logs
+        .filter((l) => l.created_by === p.id && inPeriod(l.created_at))
+        .map((l) => l.created_at.slice(0, 10))
+    ).size;
+    return {
+      employee_id: p.id,
+      full_name: p.full_name,
+      role: p.role,
+      total: assigned.length,
+      delivered: delivered.length,
+      returned: returned.length,
+      pending: assigned.length - delivered.length - returned.length,
+      delivery_rate: closed > 0 ? Math.round((delivered.length / closed) * 100) : null,
+      expected_revenue: revenue(assigned),
+      collected_revenue: revenue(delivered),
+      lost_revenue: revenue(returned),
+      days_worked: days,
+    };
+  });
+
+  const deliveredTotal = periodShipments.filter((s) => s.status === "delivered").length;
+  const returnedTotal = periodShipments.filter((s) => s.status === "returned").length;
+  const closedTotal = deliveredTotal + returnedTotal;
+
+  return {
+    attendance: attendanceRows,
+    permissions: permissionRows,
+    shipments: shipmentRows.sort(
+      (a, b) => b.collected_revenue - a.collected_revenue || b.total - a.total
+    ),
+    summary: {
+      employees: profiles.length,
+      drivers: profiles.filter((p) => p.role === "driver").length,
+      total_shipments: periodShipments.length,
+      delivered: deliveredTotal,
+      returned: returnedTotal,
+      pending_shipments: periodShipments.filter(
+        (s) => !["delivered", "returned"].includes(s.status)
+      ).length,
+      delivery_rate: closedTotal > 0 ? Math.round((deliveredTotal / closedTotal) * 100) : null,
+      attendance_days: attendanceRows.reduce((a, r) => a + r.total_days, 0),
+      permission_days: attendanceRows.reduce((a, r) => a + r.permission_days, 0),
+      expected_revenue: revenue(periodShipments),
+      collected_revenue: revenue(periodShipments.filter((s) => s.status === "delivered")),
+      lost_revenue: revenue(periodShipments.filter((s) => s.status === "returned")),
+    },
+  };
+}

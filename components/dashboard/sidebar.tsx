@@ -16,6 +16,7 @@ import {
   BarChart3,
   CalendarClock,
   History,
+  FileBarChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
@@ -44,6 +45,7 @@ const navItems = [
       { href: "/dashboard/users", label: "الموظفون والصلاحيات", icon: ShieldCheck, roles: ["admin"] },
       { href: "/dashboard/drivers", label: "المناديب والسائقون", icon: Users, roles: ["admin"] },
       { href: "/dashboard/performance", label: "إحصائيات الموظفين", icon: BarChart3, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
+      { href: "/dashboard/reports", label: "التقارير", icon: FileBarChart, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
       { href: "/dashboard/trucks", label: "الأسطول والشاحنات", icon: Truck, roles: ["admin"] },
     ],
   },
