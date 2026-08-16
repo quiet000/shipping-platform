@@ -437,9 +437,9 @@ export default function AttendancePage() {
                         {a.status === "present" ? "حاضر" : "إذن"}
                       </span>
                     </td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{formatTime(a.check_in)}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{formatTime(a.check_out)}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                    <td className="py-3 text-slate-600 dark:text-slate-300">{formatTime(a.check_in)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">{formatTime(a.check_out)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">
                       {formatTime(a.permission_start)}
                       {a.permission_resumed_at && (
                         <span className="mr-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">
@@ -447,7 +447,7 @@ export default function AttendancePage() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{hrs > 0 ? formatHours(hrs) : "—"}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">{hrs > 0 ? formatHours(hrs) : "—"}</td>
                   </tr>
                 );
               })}
@@ -490,7 +490,7 @@ export default function AttendancePage() {
                   className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2 text-slate-600 dark:text-slate-300">{formatDate(r.date)}</td>
-                  <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                  <td className="py-3 text-slate-600 dark:text-slate-300">
                     {r.leave_time
                       ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
                       : "—"}
@@ -573,7 +573,7 @@ export default function AttendancePage() {
                       </div>
                     </td>
                     <td className="py-3 text-slate-600 dark:text-slate-300">{formatDate(r.date)}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                    <td className="py-3 text-slate-600 dark:text-slate-300">
                       {r.leave_time
                         ? new Date(r.leave_time).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
                         : "—"}
@@ -657,7 +657,7 @@ export default function AttendancePage() {
                     <td className="py-3 font-semibold text-amber-600 dark:text-amber-400">{r.permission_days}</td>
                     <td className="py-3 text-slate-600 dark:text-slate-300">{r.total_days}</td>
                     <td className="py-3 text-slate-600 dark:text-slate-300">{formatHours(r.total_hours)}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{r.avg_check_in ?? "—"}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300">{r.avg_check_in ?? "—"}</td>
                   </tr>
                 ))}
                 {report.length === 0 && (
