@@ -133,12 +133,25 @@ ALTER TABLE permission_requests ENABLE ROW LEVEL SECURITY;
 --  RLS Policies
 -- ============================================================
 
+-- Helper: current user's role (SECURITY DEFINER to avoid RLS self-reference recursion)
+CREATE OR REPLACE FUNCTION public.current_user_role()
+RETURNS user_role
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT role FROM profiles WHERE id = auth.uid();
+$$;
+REVOKE ALL ON FUNCTION public.current_user_role() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.current_user_role() TO authenticated, anon;
+
 -- Profiles: staff read their own profile, management reads all, admin manages all
 DROP POLICY IF EXISTS "profiles_read_all" ON profiles;
 CREATE POLICY "profiles_read_all" ON profiles
   FOR SELECT USING (
     auth.uid() = id
-    OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+    OR public.current_user_role() IN ('admin', 'supervisor', 'branch_manager', 'accountant')
   );
 
 CREATE POLICY "profiles_update_own" ON profiles
@@ -151,17 +164,17 @@ CREATE POLICY "profiles_insert_own" ON profiles
 -- Admin can update any profile (roles & permissions management)
 CREATE POLICY "profiles_admin_update_all" ON profiles
   FOR UPDATE USING (
-    (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
+    public.current_user_role() = 'admin'
   );
 
 CREATE POLICY "profiles_admin_insert" ON profiles
   FOR INSERT WITH CHECK (
-    (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
+    public.current_user_role() = 'admin'
   );
 
 CREATE POLICY "profiles_admin_delete" ON profiles
   FOR DELETE USING (
-    (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
+    public.current_user_role() = 'admin'
   );
 
 -- Shipments: staff can read all, drivers see assigned, admin/supervisor write
