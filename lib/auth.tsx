@@ -59,18 +59,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const supabase = createClient();
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.session.user.id)
-          .single();
-        setUser((profile as Profile) ?? null);
+    let active = true;
+    let settled = false;
+    const settle = () => {
+      if (!settled && active) {
+        settled = true;
+        setLoading(false);
       }
-      setLoading(false);
+    };
+
+    const loadProfile = async (uid: string) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .single();
+      if (!active) return;
+      const p = (profile as Profile) ?? null;
+      if (p && !p.is_active) {
+        await supabase.auth.signOut();
+        setUser(null);
+        router.push("/login");
+        settle();
+        return;
+      }
+      setUser(p);
+      settle();
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadProfile(session.user.id);
+      } else {
+        setUser(null);
+        settle();
+      }
     });
-  }, []);
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) loadProfile(data.session.user.id);
+      else settle();
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [router]);
 
   const login = async (email: string, password: string): Promise<Profile> => {
     if (!hasSupabaseEnv) {
@@ -90,7 +125,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", data.user.id)
       .single();
     const p = (profile as Profile) ?? null;
-    if (p && !p.is_active) throw new Error("هذا الحساب موقوف");
+    if (!p) {
+      await supabase.auth.signOut();
+      throw new Error("تعذر تحميل بياناتك — تواصل مع مدير النظام");
+    }
+    if (!p.is_active) throw new Error("هذا الحساب موقوف");
     setUser(p);
     return p;
   };

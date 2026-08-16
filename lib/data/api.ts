@@ -26,7 +26,7 @@ import {
   mockShipments,
   mockTrucks,
 } from "@/lib/data/mock";
-import { daysFromNow } from "@/lib/utils";
+import { daysFromNow, monthEnd } from "@/lib/utils";
 
 export type ShipmentInput = {
   waybill_number?: string;
@@ -72,6 +72,14 @@ export type TruckInput = {
 };
 
 const db = () => createClient();
+
+async function safeRollback(p: PromiseLike<unknown>): Promise<void> {
+  try {
+    await p;
+  } catch {
+    // best-effort rollback
+  }
+}
 
 async function getSessionToken(): Promise<string | null> {
   if (!hasSupabaseEnv) return null;
@@ -267,17 +275,37 @@ export async function updateShipmentStatus(
     }
     return;
   }
+  const TERMINAL: ShipmentStatus[] = ["delivered", "returned"];
+  const { data: current } = await db()
+    .from("shipments")
+    .select("status")
+    .eq("id", id)
+    .maybeSingle();
+  const prev = current?.status;
+  if (prev && TERMINAL.includes(prev) && status !== prev) {
+    throw new Error("لا يمكن تغيير الحالة بعد التسليم أو الإرجاع");
+  }
   const { error } = await db()
     .from("shipments")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  await db().from("shipment_logs").insert({
+  if (prev === status) return;
+  const { error: logErr } = await db().from("shipment_logs").insert({
     shipment_id: id,
     status,
     notes: notes ?? "تم تحديث الحالة",
     created_by: createdBy ?? null,
   });
+  if (logErr) {
+    await safeRollback(
+      db()
+        .from("shipments")
+        .update({ status: prev, updated_at: new Date().toISOString() })
+        .eq("id", id)
+    );
+    throw new Error(logErr.message);
+  }
 }
 
 export async function updateShipment(id: string, patch: Partial<Shipment>): Promise<void> {
@@ -346,15 +374,19 @@ export async function getDashboardStats(range: StatsRange = "all", driverId?: st
 
 export async function getDeliveryTrend(driverId?: string) {
   const shipments = await getShipments(driverId);
+  const localKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate()
+    ).padStart(2, "0")}`;
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     return d;
   });
   return last7.map((day) => {
-    const key = day.toISOString().slice(0, 10);
+    const key = localKey(day);
     const dayShipments = shipments.filter(
-      (s) => s.created_at.slice(0, 10) === key
+      (s) => localKey(new Date(s.created_at)) === key
     );
     return {
       date: key,
@@ -375,6 +407,72 @@ export async function getAgencyBreakdown(driverId?: string) {
       delivered: list.filter((s) => s.status === "delivered").length,
     };
   });
+}
+
+export type DashboardData = {
+  stats: Awaited<ReturnType<typeof getDashboardStats>>;
+  trend: Awaited<ReturnType<typeof getDeliveryTrend>>;
+  agencyBreakdown: Awaited<ReturnType<typeof getAgencyBreakdown>>;
+  shipments: Shipment[];
+};
+
+export async function getDashboardData(
+  range: StatsRange = "all",
+  driverId?: string
+): Promise<DashboardData> {
+  const [shipments, agencies, drivers, trucks] = await Promise.all([
+    getShipments(driverId),
+    getAgencies(),
+    getDrivers(),
+    getTrucks(),
+  ]);
+  const cutoff = statsCutoff(range);
+  const inRange = cutoff
+    ? shipments.filter((s) => new Date(s.created_at).getTime() >= cutoff)
+    : shipments;
+  const delivered = inRange.filter((s) => s.status === "delivered");
+  const stats = {
+    total: inRange.length,
+    delivered: delivered.length,
+    pending: inRange.filter((s) => !["delivered", "returned"].includes(s.status)).length,
+    returned: inRange.filter((s) => s.status === "returned").length,
+    outForDelivery: inRange.filter((s) => s.status === "out_for_delivery").length,
+    activeDrivers: drivers.filter((d) => d.is_active).length,
+    totalTrucks: trucks.length,
+    revenue: delivered.reduce(
+      (acc, s) => acc + (s.cod_amount || 0) + (s.price || 0),
+      0
+    ),
+  };
+  const localKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate()
+    ).padStart(2, "0")}`;
+  const last7 = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+  const trend = last7.map((day) => {
+    const key = localKey(day);
+    const dayShipments = shipments.filter(
+      (s) => localKey(new Date(s.created_at)) === key
+    );
+    return {
+      date: key,
+      delivered: dayShipments.filter((s) => s.status === "delivered").length,
+      created: dayShipments.length,
+    };
+  });
+  const agencyBreakdown = agencies.map((a) => {
+    const list = shipments.filter((s) => s.agency_id === a.id);
+    return {
+      name: a.name,
+      total: list.length,
+      delivered: list.filter((s) => s.status === "delivered").length,
+    };
+  });
+  return { stats, trend, agencyBreakdown, shipments };
 }
 
 // ---------------- Employee Performance ----------------
@@ -398,16 +496,17 @@ export async function getEmployeePerformance(): Promise<EmployeePerformanceRow[]
   const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
   const shipments = await getShipments();
 
+  const profileIds = profiles.map((p) => p.id);
   let logs: { created_by: string | null; created_at: string }[] = [];
   if (!hasSupabaseEnv) {
     logs = Object.values(mockLogs)
       .flat()
       .map((l) => ({ created_by: l.created_by ?? null, created_at: l.created_at }));
-  } else {
+  } else if (profileIds.length > 0) {
     const { data, error } = await db()
       .from("shipment_logs")
       .select("created_by, created_at")
-      .limit(5000);
+      .in("created_by", profileIds);
     if (error) throw new Error(error.message);
     logs = (data ?? []) as { created_by: string | null; created_at: string }[];
   }
@@ -721,7 +820,8 @@ export async function markNotificationRead(id: string): Promise<void> {
     if (n) n.is_read = true;
     return;
   }
-  await db().from("notifications").update({ is_read: true }).eq("id", id);
+  const { error } = await db().from("notifications").update({ is_read: true }).eq("id", id);
+  if (error) throw new Error(error.message);
 }
 
 export async function markAllNotificationsRead(driverId?: string): Promise<void> {
@@ -763,7 +863,7 @@ export async function generateSlaAlerts(): Promise<number> {
 
 export async function getAttendance(month: string, employeeId?: string): Promise<Attendance[]> {
   const start = `${month}-01`;
-  const end = `${month}-31`;
+  const end = monthEnd(month);
   if (!hasSupabaseEnv) return [];
   let q = db()
     .from("attendance")
@@ -907,7 +1007,7 @@ export async function getPermissionRequests(
     .from("permission_requests")
     .select("*")
     .order("created_at", { ascending: false });
-  if (month) q = q.gte("date", `${month}-01`).lte("date", `${month}-31`);
+  if (month) q = q.gte("date", `${month}-01`).lte("date", monthEnd(month));
   if (employeeId) q = q.eq("employee_id", employeeId);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
@@ -935,32 +1035,35 @@ export async function reviewPermissionRequest(
   } = await createClient().auth.getSession();
   const reviewerId = session?.user.id ?? null;
   const now = new Date().toISOString();
-  const { error } = await db()
-    .from("permission_requests")
-    .update({ status, reviewed_by: reviewerId, reviewed_at: now })
-    .eq("id", id);
-  if (error) throw new Error(error.message);
-  if (status !== "approved") return;
+  if (status !== "approved") {
+    const { error } = await db()
+      .from("permission_requests")
+      .update({ status, reviewed_by: reviewerId, reviewed_at: now })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
   const { data: req, error: reqErr } = await db()
     .from("permission_requests")
     .select("employee_id, date, leave_time, duration")
     .eq("id", id)
     .single();
-  if (reqErr || !req) return;
+  if (reqErr || !req) throw new Error(reqErr?.message ?? "تعذّر تحميل الطلب");
   const permissionStart = req.leave_time ?? now;
   const durMs =
     req.duration === "1hour" ? 3600000 : req.duration === "2hours" ? 7200000 : null;
   const permissionEnd = durMs
     ? new Date(new Date(permissionStart).getTime() + durMs).toISOString()
     : null;
-  const { data: existing } = await db()
+  const { data: existing, error: existingErr } = await db()
     .from("attendance")
     .select("*")
     .eq("employee_id", req.employee_id)
     .eq("date", req.date)
     .maybeSingle();
+  if (existingErr) throw new Error(existingErr.message);
   if (existing) {
-    await db()
+    const { error: upErr } = await db()
       .from("attendance")
       .update({
         status: "permission",
@@ -969,8 +1072,9 @@ export async function reviewPermissionRequest(
         updated_at: now,
       })
       .eq("id", existing.id);
+    if (upErr) throw new Error(upErr.message);
   } else {
-    await db()
+    const { error: insErr } = await db()
       .from("attendance")
       .insert({
         employee_id: req.employee_id,
@@ -979,6 +1083,36 @@ export async function reviewPermissionRequest(
         permission_start: permissionStart,
         permission_end: permissionEnd,
       });
+    if (insErr) throw new Error(insErr.message);
+  }
+  const { error: upReqErr } = await db()
+    .from("permission_requests")
+    .update({ status, reviewed_by: reviewerId, reviewed_at: now })
+    .eq("id", id);
+  if (upReqErr) {
+    if (existing) {
+      await safeRollback(
+        db()
+          .from("attendance")
+          .update({
+            status: existing.status,
+            permission_start: existing.permission_start,
+            permission_end: existing.permission_end,
+            updated_at: now,
+          })
+          .eq("id", existing.id)
+      );
+    } else {
+      await safeRollback(
+        db()
+          .from("attendance")
+          .delete()
+          .eq("employee_id", req.employee_id)
+          .eq("date", req.date)
+          .eq("status", "permission")
+      );
+    }
+    throw new Error(upReqErr.message);
   }
 }
 
@@ -987,6 +1121,9 @@ export async function resumeAttendance(employeeId: string): Promise<void> {
   const existing = await getAttendanceToday(employeeId);
   if (!existing || !existing.permission_start || existing.permission_resumed_at) {
     throw new Error("لا يوجد إذن نشط لاستئناف الحضور");
+  }
+  if (!existing.check_in) {
+    throw new Error("لا يمكن استئناف الحضور قبل تسجيل الحضور");
   }
   if (!existing.permission_end) {
     throw new Error("إذن اليوم الكامل لا يتطلب استئناف حضور");
@@ -1031,7 +1168,7 @@ export type ActivityLogEntry = {
 export async function getActivityLog(month: string): Promise<ActivityLogEntry[]> {
   if (!hasSupabaseEnv) return [];
   const start = `${month}-01`;
-  const end = `${month}-31`;
+  const end = monthEnd(month);
   const entries: ActivityLogEntry[] = [];
 
   const { data: attendance, error: aErr } = await db()
@@ -1205,6 +1342,7 @@ export async function getReportsData(start: string, end: string): Promise<Report
 
   const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
   const shipments = await getShipments();
+  const profileIds = profiles.map((p) => p.id);
 
   const [attRes, permRes, logRes] = await Promise.all([
     db()
@@ -1217,7 +1355,12 @@ export async function getReportsData(start: string, end: string): Promise<Report
       .select("*, employee:profiles!permission_requests_employee_id_fkey(full_name, role)")
       .gte("date", start)
       .lte("date", end),
-    db().from("shipment_logs").select("created_by, created_at").limit(5000),
+    profileIds.length > 0
+      ? db()
+          .from("shipment_logs")
+          .select("created_by, created_at")
+          .in("created_by", profileIds)
+      : Promise.resolve({ data: [], error: null } as const),
   ]);
   if (attRes.error) throw new Error(attRes.error.message);
   if (permRes.error) throw new Error(permRes.error.message);

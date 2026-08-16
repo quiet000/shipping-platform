@@ -16,10 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { StatusBadge } from "@/components/ui/badge";
 import {
-  getDashboardStats,
-  getDeliveryTrend,
-  getAgencyBreakdown,
-  getShipments,
+  getDashboardData,
   type StatsRange,
 } from "@/lib/data/api";
 import { formatCurrency, formatTimeAgo } from "@/lib/utils";
@@ -77,27 +74,18 @@ export default function DashboardPage() {
   const isDriver = user?.role === "driver";
   const driverId = isDriver ? user.id : undefined;
   const [range, setRange] = useState<StatsRange>("all");
-  const { data: stats, isLoading: loadingStats } = useQuery({
-    queryKey: ["stats", range, driverId],
-    queryFn: () => getDashboardStats(range, driverId),
-    refetchInterval: 15_000,
+  const {
+    data,
+    isLoading: loadingStats,
+  } = useQuery({
+    queryKey: ["dashboard", range, driverId],
+    queryFn: () => getDashboardData(range, driverId),
+    refetchInterval: 30_000,
   });
-
-  const { data: trend = [] } = useQuery({
-    queryKey: ["delivery-trend", driverId],
-    queryFn: () => getDeliveryTrend(driverId),
-  });
-
-  const { data: agencyData = [] } = useQuery({
-    queryKey: ["agency-breakdown", driverId],
-    queryFn: () => getAgencyBreakdown(driverId),
-  });
-
-  const { data: shipments = [] } = useQuery({
-    queryKey: ["shipments", driverId],
-    queryFn: () => getShipments(driverId),
-    refetchInterval: 15_000,
-  });
+  const stats = data?.stats;
+  const trend = data?.trend ?? [];
+  const agencyData = data?.agencyBreakdown ?? [];
+  const shipments = data?.shipments ?? [];
 
   const recent = [...shipments]
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())

@@ -105,11 +105,8 @@ export function BulkImportModal({ open, onClose }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const total = rowsWithDefaults.length;
-      for (let i = 0; i < total; i++) {
-        await createShipmentsBulk([rowsWithDefaults[i]]);
-        setProgress(Math.round(((i + 1) / total) * 100));
-      }
+      await createShipmentsBulk(rowsWithDefaults);
+      setProgress(100);
     },
     onSuccess: () => {
       toast.success(`تم استيراد ${rowsWithDefaults.length} شحنة بنجاح`);

@@ -133,9 +133,13 @@ ALTER TABLE permission_requests ENABLE ROW LEVEL SECURITY;
 --  RLS Policies
 -- ============================================================
 
--- Profiles: user can read all profiles, update own, admin manages all
+-- Profiles: staff read their own profile, management reads all, admin manages all
+DROP POLICY IF EXISTS "profiles_read_all" ON profiles;
 CREATE POLICY "profiles_read_all" ON profiles
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+  FOR SELECT USING (
+    auth.uid() = id
+    OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'supervisor', 'branch_manager', 'accountant')
+  );
 
 CREATE POLICY "profiles_update_own" ON profiles
   FOR UPDATE USING (auth.uid() = id);
@@ -397,7 +401,7 @@ BEGIN
   FROM shipments s
   LEFT JOIN agencies a ON a.id = s.agency_id
   LEFT JOIN profiles p ON p.id = s.assigned_driver_id
-  WHERE s.waybill_number = p_waybill
+  WHERE lower(s.waybill_number) = lower(p_waybill)
   LIMIT 1;
   RETURN v;
 END;
@@ -424,7 +428,7 @@ BEGIN
   INTO v
   FROM shipment_logs l
   JOIN shipments s ON s.id = l.shipment_id
-  WHERE s.waybill_number = p_waybill;
+  WHERE lower(s.waybill_number) = lower(p_waybill);
   RETURN v;
 END;
 $$;
@@ -463,3 +467,19 @@ $$;
 
 -- Optional: run automatically every 6 hours (enable pg_cron first)
 -- SELECT cron.schedule('sla-alerts', '0 */6 * * *', 'SELECT generate_sla_alerts();');
+
+-- ============================================================
+--  Indexes for hot query paths (attendance/permission/shipments)
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_attendance_employee_date ON attendance (employee_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance (date);
+CREATE INDEX IF NOT EXISTS idx_pr_employee ON permission_requests (employee_id);
+CREATE INDEX IF NOT EXISTS idx_pr_date ON permission_requests (date);
+CREATE INDEX IF NOT EXISTS idx_pr_status ON permission_requests (status);
+CREATE INDEX IF NOT EXISTS idx_shipments_status ON shipments (status);
+CREATE INDEX IF NOT EXISTS idx_shipments_created ON shipments (created_at);
+CREATE INDEX IF NOT EXISTS idx_shipments_agency ON shipments (agency_id);
+CREATE INDEX IF NOT EXISTS idx_shipments_driver ON shipments (assigned_driver_id);
+CREATE INDEX IF NOT EXISTS idx_logs_shipment ON shipment_logs (shipment_id);
+CREATE INDEX IF NOT EXISTS idx_logs_created_by ON shipment_logs (created_by);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications (created_at);

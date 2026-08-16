@@ -24,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const profile = await login(email, password);
-      toast.success(`مرحباً ${profile.full_name}!`);
+      if (profile) toast.success(`مرحباً ${profile.full_name}!`);
       router.push("/dashboard");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تسجيل الدخول");

@@ -16,7 +16,7 @@ import { Drawer } from "@/components/ui/drawer";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { getShipmentLogs, getShipment, updateShipmentStatus, getDrivers } from "@/lib/data/api";
+import { getShipmentLogs, getShipment, updateShipmentStatus } from "@/lib/data/api";
 import { useAuth } from "@/lib/auth";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import {
@@ -47,8 +47,6 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
     queryFn: () => getShipmentLogs(shipmentId!),
     enabled: !!shipmentId,
   });
-
-  const { data: drivers = [] } = useQuery({ queryKey: ["drivers"], queryFn: getDrivers });
 
   useEffect(() => {
     setUpdating(false);

@@ -37,7 +37,7 @@ import {
   resumeAttendance,
   workedHours,
 } from "@/lib/data/api";
-import { cn, formatDateTime, formatDate, daysFromNow } from "@/lib/utils";
+import { cn, formatDateTime, formatDate, daysFromNow, formatHours } from "@/lib/utils";
 import {
   ATTENDANCE_LABELS,
   PERMISSION_LABELS,
@@ -53,12 +53,6 @@ const REPORT_ROLES = ["admin", "supervisor", "branch_manager", "accountant"];
 function currentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function formatHours(hours: number) {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return m > 0 ? `${h} س ${m} د` : `${h} س`;
 }
 
 function formatTime(iso?: string | null) {
@@ -221,7 +215,7 @@ export default function AttendancePage() {
 
   const permissionActive =
     !!today?.permission_start &&
-    !!today?.permission_resumed_at === false &&
+    !today?.permission_resumed_at &&
     today?.status === "permission";
   const permissionWaiting =
     permissionActive &&
@@ -230,6 +224,7 @@ export default function AttendancePage() {
   const permissionFullDay = permissionActive && !today?.permission_end;
   const canResume =
     !!today?.permission_start &&
+    !!today?.check_in &&
     !!today?.permission_end &&
     !today?.permission_resumed_at &&
     new Date(today.permission_end).getTime() <= Date.now();
@@ -308,6 +303,18 @@ export default function AttendancePage() {
                   <Button variant="accent" onClick={() => resume.mutate()} loading={resume.isPending}>
                     <RotateCcw className="h-4 w-4" />
                     استئناف الحضور
+                  </Button>
+                )}
+                {permissionWaiting && (
+                  <Button variant="outline" disabled>
+                    <Clock4 className="h-4 w-4" />
+                    بانتظار انتهاء الإذن
+                  </Button>
+                )}
+                {permissionFullDay && (
+                  <Button variant="outline" disabled>
+                    <ClipboardList className="h-4 w-4" />
+                    إذن لباقي اليوم
                   </Button>
                 )}
                 {today.status === "present" && !today.check_out && !canResume && (

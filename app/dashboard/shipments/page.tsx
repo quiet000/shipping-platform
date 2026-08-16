@@ -41,7 +41,7 @@ export default function ShipmentsPage() {
   const { data: shipments = [] } = useQuery({
     queryKey: ["shipments"],
     queryFn: () => getShipments(),
-    refetchInterval: 15_000,
+    refetchInterval: 30_000,
   });
 
   const { data: agencies = [] } = useQuery({ queryKey: ["agencies"], queryFn: getAgencies });

@@ -25,7 +25,7 @@ import {
   type ReportPermissionRow,
   type ReportShipmentRow,
 } from "@/lib/data/api";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, monthEnd, formatHours } from "@/lib/utils";
 import { ROLE_LABELS, type UserRole } from "@/lib/types";
 
 type PeriodMode = "monthly" | "yearly";
@@ -36,9 +36,10 @@ function currentMonth() {
 }
 
 function escapeCsv(value: string | number | null | undefined): string {
-  const s = String(value ?? "");
-  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-  return s;
+  const raw = String(value ?? "");
+  const guarded = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
+  if (/[",\n\r]/.test(guarded)) return '"' + guarded.replace(/"/g, '""') + '"';
+  return guarded;
 }
 
 function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
@@ -56,12 +57,6 @@ function downloadCsv(filename: string, rows: (string | number | null | undefined
 
 function roleLabel(role: string | null): string {
   return role && ROLE_LABELS[role as UserRole] ? ROLE_LABELS[role as UserRole] : role ?? "";
-}
-
-function hoursText(h: number) {
-  const hh = Math.floor(h);
-  const mm = Math.round((h - hh) * 60);
-  return mm > 0 ? `${hh} س ${mm} د` : `${hh} س`;
 }
 
 function KpiCard({
@@ -99,7 +94,7 @@ export default function ReportsPage() {
   const [year, setYear] = useState(String(new Date().getFullYear()));
 
   const period = useMemo(() => {
-    if (mode === "monthly") return { start: `${month}-01`, end: `${month}-31` };
+    if (mode === "monthly") return { start: `${month}-01`, end: monthEnd(month) };
     return { start: `${year}-01-01`, end: `${year}-12-31` };
   }, [mode, month, year]);
 
@@ -119,7 +114,7 @@ export default function ReportsPage() {
       r.present_days,
       r.permission_days,
       r.total_days,
-      hoursText(r.total_hours),
+      formatHours(r.total_hours),
       r.avg_check_in ?? "—",
     ]),
   ];
@@ -311,7 +306,7 @@ export default function ReportsPage() {
                   <td className="py-3 font-semibold text-amber-600 dark:text-amber-400">{r.permission_days}</td>
                   <td className="py-3 text-slate-600 dark:text-slate-300">{r.total_days}</td>
                   <td className="py-3 text-slate-600 dark:text-slate-300">
-                    {Math.floor(r.total_hours)} س {Math.round((r.total_hours - Math.floor(r.total_hours)) * 60)} د
+                    {formatHours(r.total_hours)}
                   </td>
                   <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{r.avg_check_in ?? "—"}</td>
                 </tr>

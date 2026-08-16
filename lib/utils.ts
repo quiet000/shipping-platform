@@ -57,6 +57,19 @@ export function daysFromNow(days: number) {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+export function monthEnd(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  const last = new Date(y, m, 0).getDate();
+  return `${y}-${String(m).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+}
+
+export function formatHours(hours: number): string {
+  const total = Math.round(hours * 60);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m > 0 ? `${h} س ${m} د` : `${h} س`;
+}
+
 export function generateWaybillNumber() {
   const n = Math.floor(100000 + Math.random() * 900000);
   return `SHP-${n}`;
