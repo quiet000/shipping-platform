@@ -829,14 +829,31 @@ export type AttendanceReportRow = {
   avg_check_in: string | null;
 };
 
+export function workedHours(att: Attendance): number {
+  if (!att.check_in) return 0;
+  if (att.permission_start) {
+    let total = Math.max(
+      0,
+      (new Date(att.permission_start).getTime() - new Date(att.check_in).getTime()) / 3600000
+    );
+    if (att.permission_resumed_at && att.check_out) {
+      total += Math.max(
+        0,
+        (new Date(att.check_out).getTime() - new Date(att.permission_resumed_at).getTime()) / 3600000
+      );
+    }
+    return total;
+  }
+  if (!att.check_out) return 0;
+  return Math.max(
+    0,
+    (new Date(att.check_out).getTime() - new Date(att.check_in).getTime()) / 3600000
+  );
+}
+
 export async function getAttendanceReport(month: string): Promise<AttendanceReportRow[]> {
   const records = await getAttendance(month);
   const profiles = (await getProfiles()).filter((p) => p.role !== "admin");
-  const hoursFor = (a: Attendance) => {
-    if (!a.check_in || !a.check_out) return 0;
-    const diff = new Date(a.check_out).getTime() - new Date(a.check_in).getTime();
-    return Math.max(0, diff / 3600000);
-  };
   return profiles
     .map((p) => {
       const mine = records.filter((a) => a.employee_id === p.id);
@@ -853,7 +870,7 @@ export async function getAttendanceReport(month: string): Promise<AttendanceRepo
         present_days: mine.filter((a) => a.status === "present").length,
         permission_days: mine.filter((a) => a.status === "permission").length,
         total_days: mine.length,
-        total_hours: mine.reduce((acc, a) => acc + hoursFor(a), 0),
+        total_hours: mine.reduce((acc, a) => acc + workedHours(a), 0),
         avg_check_in: avgIn
           ? new Intl.DateTimeFormat("ar-EG", {
               hour: "2-digit",
@@ -926,10 +943,16 @@ export async function reviewPermissionRequest(
   if (status !== "approved") return;
   const { data: req, error: reqErr } = await db()
     .from("permission_requests")
-    .select("employee_id, date")
+    .select("employee_id, date, leave_time, duration")
     .eq("id", id)
     .single();
   if (reqErr || !req) return;
+  const permissionStart = req.leave_time ?? now;
+  const durMs =
+    req.duration === "1hour" ? 3600000 : req.duration === "2hours" ? 7200000 : null;
+  const permissionEnd = durMs
+    ? new Date(new Date(permissionStart).getTime() + durMs).toISOString()
+    : null;
   const { data: existing } = await db()
     .from("attendance")
     .select("*")
@@ -939,13 +962,44 @@ export async function reviewPermissionRequest(
   if (existing) {
     await db()
       .from("attendance")
-      .update({ status: "permission", updated_at: now })
+      .update({
+        status: "permission",
+        permission_start: permissionStart,
+        permission_end: permissionEnd,
+        updated_at: now,
+      })
       .eq("id", existing.id);
   } else {
     await db()
       .from("attendance")
-      .insert({ employee_id: req.employee_id, date: req.date, status: "permission" });
+      .insert({
+        employee_id: req.employee_id,
+        date: req.date,
+        status: "permission",
+        permission_start: permissionStart,
+        permission_end: permissionEnd,
+      });
   }
+}
+
+export async function resumeAttendance(employeeId: string): Promise<void> {
+  if (!hasSupabaseEnv) return;
+  const existing = await getAttendanceToday(employeeId);
+  if (!existing || !existing.permission_start || existing.permission_resumed_at) {
+    throw new Error("لا يوجد إذن نشط لاستئناف الحضور");
+  }
+  if (!existing.permission_end) {
+    throw new Error("إذن اليوم الكامل لا يتطلب استئناف حضور");
+  }
+  if (new Date(existing.permission_end).getTime() > Date.now()) {
+    throw new Error("لم تنتهِ مدة الإذن بعد");
+  }
+  const now = new Date().toISOString();
+  const { error } = await db()
+    .from("attendance")
+    .update({ status: "present", permission_resumed_at: now, updated_at: now })
+    .eq("id", existing.id);
+  if (error) throw new Error(error.message);
 }
 
 export async function cancelPermissionRequest(id: string): Promise<void> {
@@ -1189,14 +1243,7 @@ export async function getReportsData(start: string, end: string): Promise<Report
       withTimes.length > 0
         ? withTimes.reduce((s, a) => s + new Date(a.check_in!).getTime(), 0) / withTimes.length
         : null;
-    const total_hours = mine.reduce(
-      (acc, a) =>
-        acc +
-        (a.check_in && a.check_out
-          ? Math.max(0, (new Date(a.check_out).getTime() - new Date(a.check_in).getTime()) / 3600000)
-          : 0),
-      0
-    );
+    const total_hours = mine.reduce((acc, a) => acc + workedHours(a), 0);
     return {
       employee_id: p.id,
       full_name: p.full_name,

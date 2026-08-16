@@ -93,6 +93,9 @@ export interface Attendance {
   status: AttendanceStatus;
   check_in?: string | null;
   check_out?: string | null;
+  permission_start?: string | null;
+  permission_end?: string | null;
+  permission_resumed_at?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;

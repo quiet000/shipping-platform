@@ -16,6 +16,7 @@ import {
   UserCheck,
   FileText,
   X,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,8 @@ import {
   getPendingPermissionRequests,
   reviewPermissionRequest,
   cancelPermissionRequest,
+  resumeAttendance,
+  workedHours,
 } from "@/lib/data/api";
 import { cn, formatDateTime, formatDate, daysFromNow } from "@/lib/utils";
 import {
@@ -56,6 +59,11 @@ function formatHours(hours: number) {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return m > 0 ? `${h} س ${m} د` : `${h} س`;
+}
+
+function formatTime(iso?: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
 }
 
 function SummaryCard({
@@ -202,12 +210,33 @@ export default function AttendancePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const resume = useMutation({
+    mutationFn: () => resumeAttendance(user!.id),
+    onSuccess: () => {
+      toast.success("تم استئناف الحضور — يومك مكتمل");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const permissionActive =
+    !!today?.permission_start &&
+    !!today?.permission_resumed_at === false &&
+    today?.status === "permission";
+  const permissionWaiting =
+    permissionActive &&
+    !!today?.permission_end &&
+    new Date(today.permission_end).getTime() > Date.now();
+  const permissionFullDay = permissionActive && !today?.permission_end;
+  const canResume =
+    !!today?.permission_start &&
+    !!today?.permission_end &&
+    !today?.permission_resumed_at &&
+    new Date(today.permission_end).getTime() <= Date.now();
+
   const myPresent = myMonth.filter((a) => a.status === "present").length;
   const myPermission = myMonth.filter((a) => a.status === "permission").length;
-  const myHours = myMonth.reduce((acc, a) => {
-    if (!a.check_in || !a.check_out) return acc;
-    return acc + Math.max(0, (new Date(a.check_out).getTime() - new Date(a.check_in).getTime()) / 3600000);
-  }, 0);
+  const myHours = myMonth.reduce((acc, a) => acc + workedHours(a), 0);
 
   return (
     <div className="space-y-6">
@@ -251,6 +280,22 @@ export default function AttendancePage() {
                     الحضور: {formatDateTime(today.check_in)}
                   </span>
                 )}
+                {today.permission_start && (
+                  <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                    <ClipboardList className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    الإذن: {formatDateTime(today.permission_start)}
+                    {today.permission_end && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        — ينتهي {formatDateTime(today.permission_end)}
+                      </span>
+                    )}
+                    {today.permission_resumed_at && (
+                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">
+                        استُئنف الحضور
+                      </span>
+                    )}
+                  </span>
+                )}
                 {today.check_out && (
                   <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
                     <LogOut className="h-4 w-4 text-red-500" />
@@ -259,7 +304,13 @@ export default function AttendancePage() {
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                {today.status === "present" && !today.check_out && (
+                {canResume && (
+                  <Button variant="accent" onClick={() => resume.mutate()} loading={resume.isPending}>
+                    <RotateCcw className="h-4 w-4" />
+                    استئناف الحضور
+                  </Button>
+                )}
+                {today.status === "present" && !today.check_out && !canResume && (
                   <Button onClick={() => mark.mutate({ status: "present", action: "check_out" })} loading={mark.isPending}>
                     <LogOut className="h-4 w-4" />
                     تسجيل الخروج
@@ -284,6 +335,13 @@ export default function AttendancePage() {
                   </span>
                 )}
               </div>
+              {(permissionWaiting || permissionFullDay) && (
+                <p className="w-full text-xs font-semibold text-amber-600 dark:text-amber-400">
+                  {permissionWaiting
+                    ? `مدة الإذن تنتهي في ${formatTime(today.permission_end)} — بعدها اضغط "استئناف الحضور" لاستكمال يومك، أو سيُحتسب وقت حضورك قبل الإذن فقط`
+                    : "إذن لباقي اليوم — يُحتسب وقت حضورك قبل الإذن فقط"}
+                </p>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4 py-6 text-center">
@@ -330,6 +388,73 @@ export default function AttendancePage() {
         <SummaryCard title="إجمالي الساعات" value={formatHours(myHours)} icon={Timer} color="bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400" />
         <SummaryCard title="أيام الشهر المسجلة" value={myMonth.length} icon={CalendarDays} color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400" />
       </div>
+
+      {/* My monthly attendance records */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-accent" />
+            سجل الحضور — {month}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[680px] text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                <th className="pb-3 pr-2 font-semibold">التاريخ</th>
+                <th className="pb-3 font-semibold">الحالة</th>
+                <th className="pb-3 font-semibold">وقت الحضور</th>
+                <th className="pb-3 font-semibold">وقت الخروج</th>
+                <th className="pb-3 font-semibold">وقت الإذن</th>
+                <th className="pb-3 font-semibold">ساعات العمل</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myMonth.map((a) => {
+                const hrs = workedHours(a);
+                return (
+                  <tr
+                    key={a.id}
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
+                  >
+                    <td className="py-3 pr-2 text-slate-600 dark:text-slate-300">{formatDate(a.date)}</td>
+                    <td className="py-3">
+                      <span
+                        className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[11px] font-bold",
+                          a.status === "present"
+                            ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+                        )}
+                      >
+                        {a.status === "present" ? "حاضر" : "إذن"}
+                      </span>
+                    </td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{formatTime(a.check_in)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{formatTime(a.check_out)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
+                      {formatTime(a.permission_start)}
+                      {a.permission_resumed_at && (
+                        <span className="mr-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">
+                          استُئنف
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 ltr">{hrs > 0 ? formatHours(hrs) : "—"}</td>
+                  </tr>
+                );
+              })}
+              {myMonth.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                    لا توجد سجلات حضور لهذا الشهر
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
 
       {/* My permission requests this month */}
       <Card>
