@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-950 p-4">
-      <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+      <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-sky-500/20 blur-3xl" />
       <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
 
       <div className="absolute left-4 top-4 flex items-center gap-2">
@@ -55,11 +55,11 @@ export default function LoginPage() {
         </div>
 
         <div
-          className="animate-fade-up glass rounded-2xl border border-slate-200/40 p-8 shadow-2xl shadow-blue-950/40"
+          className="animate-fade-up glass rounded-2xl border border-slate-200/40 p-8 shadow-2xl shadow-sky-950/40"
           style={{ animationDelay: "0.1s" }}
         >
-          <div className="mb-6 flex items-center gap-3 rounded-xl bg-blue-50 p-3 dark:bg-blue-500/10">
-            <ShieldCheck className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="mb-6 flex items-center gap-3 rounded-xl bg-sky-50 p-3 dark:bg-sky-500/10">
+            <ShieldCheck className="h-5 w-5 flex-shrink-0 text-sky-600 dark:text-sky-400" />
             <p className="text-xs text-slate-600 dark:text-slate-300">
               الدخول مخصص لموظفي الشركة فقط. يتم تحديد الصلاحيات حسب الدور الوظيفي لكل موظف.
             </p>

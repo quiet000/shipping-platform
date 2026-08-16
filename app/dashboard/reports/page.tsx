@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -234,7 +234,7 @@ export default function ReportsPage() {
           value={isLoading ? "..." : s?.employees ?? 0}
           sub={`${s?.drivers ?? 0} مندوب`}
           icon={UserCheck}
-          color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+          color="bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400"
         />
         <KpiCard
           title="الشحنات"
@@ -286,7 +286,7 @@ export default function ReportsPage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">الموظف</th>
                 <th className="pb-3 font-semibold">أيام الحضور</th>
                 <th className="pb-3 font-semibold">أيام الإذن</th>
@@ -299,7 +299,7 @@ export default function ReportsPage() {
               {(report?.attendance ?? []).map((r) => (
                 <tr
                   key={r.employee_id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2">
                     <div className="flex flex-col gap-1">
@@ -342,7 +342,7 @@ export default function ReportsPage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">الموظف</th>
                 <th className="pb-3 font-semibold">الطلبات</th>
                 <th className="pb-3 font-semibold">موافَق عليها</th>
@@ -355,7 +355,7 @@ export default function ReportsPage() {
               {(report?.permissions ?? []).map((r) => (
                 <tr
                   key={r.employee_id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2">
                     <div className="flex flex-col gap-1">
@@ -399,7 +399,7 @@ export default function ReportsPage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[1000px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">المندوب</th>
                 <th className="pb-3 font-semibold">أيام العمل</th>
                 <th className="pb-3 font-semibold">الشحنات</th>
@@ -416,7 +416,7 @@ export default function ReportsPage() {
               {(report?.shipments ?? []).map((r) => (
                 <tr
                   key={r.employee_id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2">
                     <div className="flex flex-col gap-1">
@@ -428,13 +428,13 @@ export default function ReportsPage() {
                   <td className="py-3 font-semibold text-slate-700 dark:text-slate-200">{r.total}</td>
                   <td className="py-3 font-semibold text-green-600 dark:text-green-400">{r.delivered}</td>
                   <td className="py-3 font-semibold text-red-600 dark:text-red-400">{r.returned}</td>
-                  <td className="py-3 text-yellow-600 dark:text-yellow-400">{r.pending}</td>
+                  <td className="py-3 text-amber-600 dark:text-amber-400">{r.pending}</td>
                   <td className="py-3">
                     <span
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-xs font-bold",
                         r.delivery_rate !== null && r.delivery_rate >= 80
-                          ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                          ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400"
                           : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                       )}
                     >
@@ -442,7 +442,7 @@ export default function ReportsPage() {
                     </span>
                   </td>
                   <td className="py-3 text-slate-600 dark:text-slate-300">{formatCurrency(r.expected_revenue)}</td>
-                  <td className="py-3 font-bold text-green-700 dark:text-green-300">
+                  <td className="py-3 font-bold text-green-600 dark:text-green-300">
                     {formatCurrency(r.collected_revenue)}
                   </td>
                   <td className="py-3 text-red-600 dark:text-red-400">{formatCurrency(r.lost_revenue)}</td>

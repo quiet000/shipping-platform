@@ -148,19 +148,19 @@ export const STATUS_LABELS: Record<ShipmentStatus, string> = {
 };
 
 export const STATUS_COLORS: Record<ShipmentStatus, string> = {
-  in_warehouse: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300",
-  out_for_delivery: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300",
+  in_warehouse: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+  out_for_delivery: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
   delivered: "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
   returned: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
-  delayed: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300",
+  delayed: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
 };
 
 export const STATUS_DOT: Record<ShipmentStatus, string> = {
-  in_warehouse: "bg-yellow-500",
-  out_for_delivery: "bg-blue-500",
+  in_warehouse: "bg-amber-500",
+  out_for_delivery: "bg-sky-500",
   delivered: "bg-green-500",
   returned: "bg-red-500",
-  delayed: "bg-orange-500",
+  delayed: "bg-amber-500",
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {
@@ -173,7 +173,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 export const ROLE_BADGE: Record<UserRole, string> = {
   admin: "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300",
-  supervisor: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300",
+  supervisor: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
   branch_manager: "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300",
   driver: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
   accountant: "bg-cyan-100 text-cyan-800 dark:bg-cyan-500/15 dark:text-cyan-300",
@@ -185,13 +185,13 @@ export const SHIPPING_TYPE_LABELS: Record<ShippingType, string> = {
 };
 
 export const ALERT_STYLES: Record<string, string> = {
-  warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300",
+  warning: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
   urgent: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
-  info: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300",
+  info: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
 };
 
 export const ALERT_ICON_COLORS: Record<string, string> = {
-  warning: "text-yellow-500",
+  warning: "text-amber-500",
   urgent: "text-red-500",
-  info: "text-blue-500",
+  info: "text-sky-500",
 };

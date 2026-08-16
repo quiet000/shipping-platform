@@ -87,13 +87,13 @@ export default function LandingPage() {
       <header
         className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "glass border-b border-slate-200/70 shadow-sm dark:border-slate-800"
+            ? "glass border-b border-slate-200/70 shadow-sm dark:border-slate-700"
             : "bg-transparent"
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-navy-900 to-navy-800 shadow-md dark:from-blue-700 dark:to-sky-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-navy-900 to-navy-800 shadow-md dark:from-sky-700 dark:to-sky-500">
               <Truck className="h-6 w-6 text-sky-300" />
             </div>
             <div>
@@ -131,7 +131,7 @@ export default function LandingPage() {
       {/* Hero + Tracking */}
       <section className="relative overflow-hidden bg-navy-950 pb-20 pt-32 sm:pt-36">
         <div className="absolute inset-0">
-          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-sky-500/20 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
         </div>
 
@@ -144,7 +144,7 @@ export default function LandingPage() {
             </span>
             <h1 className="animate-fade-up mt-6 text-4xl font-black leading-tight text-white sm:text-5xl" style={{ animationDelay: "0.06s" }}>
               تتبع شحنتك
-              <span className="mx-2 bg-gradient-to-l from-sky-400 via-blue-400 to-blue-300 bg-clip-text text-transparent">
+              <span className="mx-2 bg-[linear-gradient(135deg,#0369A1,#0EA5E9)] bg-clip-text text-transparent">
                 لحظة بلحظة
               </span>
               وبكل سهولة
@@ -186,8 +186,8 @@ export default function LandingPage() {
           >
             <div className="mb-5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/15">
-                  <Search className="h-5 w-5 text-blue-600 dark:text-sky-300" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-500/15">
+                  <Search className="h-5 w-5 text-sky-600 dark:text-sky-300" />
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-slate-800 dark:text-white">تتبع شحنتك الآن</h2>
@@ -241,7 +241,7 @@ export default function LandingPage() {
           {[
             { n: "+25K", t: "شحنة تم تسليمها", dot: "bg-green-500" },
             { n: "27", t: "محافظة نغطيها يومياً", dot: "bg-sky-400" },
-            { n: "120+", t: "مندوب وسائق", dot: "bg-blue-500" },
+            { n: "120+", t: "مندوب وسائق", dot: "bg-sky-500" },
             { n: "98%", t: "تسليم في الموعد", dot: "bg-green-400" },
           ].map((m, i) => (
             <Card
@@ -262,7 +262,7 @@ export default function LandingPage() {
       {/* Services */}
       <section id="services" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <span className="text-sm font-bold text-blue-600 dark:text-blue-400">خدماتنا</span>
+          <span className="text-sm font-bold text-sky-600 dark:text-sky-400">خدماتنا</span>
           <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white sm:text-4xl">
             حلول لوجستية متكاملة لعملك
           </h2>
@@ -273,7 +273,7 @@ export default function LandingPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s) => (
             <Card key={s.title} className="group p-6 transition hover:-translate-y-1 hover:shadow-lg">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 transition group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-600">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 transition group-hover:bg-sky-600 group-hover:text-white dark:bg-sky-600">
                 <s.icon className="h-6 w-6" />
               </div>
               <h3 className="mb-2 font-bold text-slate-800 dark:text-slate-100">{s.title}</h3>
@@ -284,10 +284,10 @@ export default function LandingPage() {
       </section>
 
       {/* About */}
-      <section id="about" className="bg-white py-20 dark:bg-slate-900/50">
+      <section id="about" className="bg-white py-20 dark:bg-slate-800/50">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
           <div className="relative">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-l from-blue-600/20 to-sky-400/20 blur-2xl" />
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-l from-[#0369A1]/25 to-[#0EA5E9]/25 blur-2xl" />
             <div className="relative grid grid-cols-2 gap-4">
               {[
                 { n: "2015", t: "سنة التأسيس" },
@@ -303,7 +303,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div>
-            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">عن الشركة</span>
+            <span className="text-sm font-bold text-sky-600 dark:text-sky-400">عن الشركة</span>
             <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white sm:text-4xl">
               شريكك الموثوق في عالم الشحن
             </h2>
@@ -334,7 +334,7 @@ export default function LandingPage() {
       {/* Partners */}
       <section id="partners" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="mb-10 text-center">
-          <span className="text-sm font-bold text-blue-600 dark:text-blue-400">شركاؤنا</span>
+          <span className="text-sm font-bold text-sky-600 dark:text-sky-400">شركاؤنا</span>
           <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">
             شركاء نجاحنا في التوزيع
           </h2>

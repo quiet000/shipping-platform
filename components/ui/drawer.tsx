@@ -26,11 +26,11 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          "absolute inset-y-0 left-0 flex w-full max-w-md flex-col bg-white shadow-2xl dark:bg-slate-900",
+          "absolute inset-y-0 left-0 flex w-full max-w-md flex-col bg-white shadow-2xl dark:bg-slate-800",
           "rtl:left-auto rtl:right-0"
         )}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
           <button
             onClick={onClose}

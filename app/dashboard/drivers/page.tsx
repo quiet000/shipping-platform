@@ -103,7 +103,7 @@ export default function DriversPage() {
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
                 <th className="px-4 py-3 font-semibold">المندوب</th>
                 <th className="px-4 py-3 font-semibold">بيانات التواصل</th>
                 <th className="px-4 py-3 font-semibold">رقم الرخصة</th>
@@ -116,11 +116,11 @@ export default function DriversPage() {
               {drivers.map((d) => (
                 <tr
                   key={d.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-xs font-black text-white dark:bg-blue-600">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-xs font-black text-white dark:bg-sky-600">
                         {d.full_name.charAt(0)}
                       </div>
                       <div>
@@ -150,7 +150,7 @@ export default function DriversPage() {
                   </td>
                   <td className="px-4 py-3">
                     <RoleBadge role={d.role} />
-                    <span className={`mr-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${d.is_active ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"}`}>
+                    <span className={`mr-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${d.is_active ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"}`}>
                       {d.is_active ? "نشط" : "موقوف"}
                     </span>
                   </td>
@@ -275,7 +275,7 @@ function DriverForm({
           <option value="branch_manager">مدير فرع</option>
         </Select>
       </div>
-      <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+      <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
         <Button type="button" variant="outline" onClick={onCancel}>
           إلغاء
         </Button>

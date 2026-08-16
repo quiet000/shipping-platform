@@ -221,7 +221,7 @@ export function BulkImportModal({ open, onClose }: Props) {
         <button
           type="button"
           onClick={downloadTemplate}
-          className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400"
+          className="flex items-center gap-2 text-sm font-semibold text-sky-600 hover:underline dark:text-sky-400"
         >
           <Download className="h-4 w-4" />
           تحميل قالب الإكسيل الجاهز
@@ -242,8 +242,8 @@ export function BulkImportModal({ open, onClose }: Props) {
           onClick={() => inputRef.current?.click()}
           className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 text-center transition ${
             dragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
-              : "border-slate-300 hover:border-blue-400 dark:border-slate-700"
+              ? "border-sky-500 bg-sky-50 dark:bg-sky-500/10"
+              : "border-slate-300 hover:border-sky-400 dark:border-slate-700"
           }`}
         >
           <FileSpreadsheet className="h-12 w-12 text-green-600 dark:text-green-400" />
@@ -254,7 +254,7 @@ export function BulkImportModal({ open, onClose }: Props) {
             <p className="mt-1 text-xs text-slate-400">يدعم ملفات .xlsx و .csv</p>
           </div>
           {fileName && (
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-500/15 dark:text-green-400">
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-600 dark:bg-green-500/15 dark:text-green-400">
               {fileName}
             </span>
           )}
@@ -300,7 +300,7 @@ export function BulkImportModal({ open, onClose }: Props) {
                 </div>
                 <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                   <div
-                    className="h-full rounded-full bg-gradient-to-l from-blue-500 to-green-500 transition-all duration-500"
+                    className="h-full rounded-full bg-gradient-to-l from-[#0369A1] to-[#0EA5E9] transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   />
                 </div>

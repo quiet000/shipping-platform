@@ -24,12 +24,12 @@ import type { UserRole } from "@/lib/types";
 const LOG_STYLES: Record<ActivityLogType, { label: string; cls: string; icon: React.ElementType }> = {
   check_in: {
     label: "تسجيل حضور",
-    cls: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+    cls: "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400",
     icon: LogIn,
   },
   check_out: {
     label: "تسجيل خروج",
-    cls: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+    cls: "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400",
     icon: LogOut,
   },
   permission_requested: {
@@ -191,7 +191,7 @@ function SummaryTile({
   cls: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+    <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
       <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${cls}`}>
         <Icon className="h-5 w-5" />
       </div>

@@ -134,8 +134,8 @@ export default function NotificationsPage() {
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl border p-4 text-right transition hover:bg-slate-50 dark:hover:bg-slate-800/60",
                     n.is_read
-                      ? "border-slate-200 dark:border-slate-800"
-                      : "border-blue-300 bg-blue-50/50 dark:border-blue-500/40 dark:bg-blue-500/5"
+                      ? "border-slate-200 dark:border-slate-700"
+                      : "border-sky-300 bg-sky-50/50 dark:border-sky-500/40 dark:bg-sky-500/5"
                   )}
                 >
                   {n.alert_type === "urgent" ? (
@@ -152,7 +152,7 @@ export default function NotificationsPage() {
                     </div>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{n.message}</p>
                     {n.title === PERMISSION_NOTIFICATION_TITLE && (
-                      <p className="mt-2 inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                      <p className="mt-2 inline-flex items-center gap-1 rounded-lg bg-sky-50 px-2 py-1 text-[11px] font-bold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
                         اضغط للانتقال إلى الطلب المعلّق واتخاذ القرار
                         <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
                       </p>
@@ -185,7 +185,7 @@ export default function NotificationsPage() {
           <Card>
             <CardHeader>
               <CardTitle>شحنات تحتاج متابعة عاجلة</CardTitle>
-              <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:bg-red-500/15 dark:text-red-400">
+              <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-600 dark:bg-red-500/15 dark:text-red-400">
                 {urgentShipments.length}
               </span>
             </CardHeader>
@@ -204,7 +204,7 @@ export default function NotificationsPage() {
                     <Link
                       key={s.id}
                       href={`/dashboard/shipments`}
-                      className="block rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60"
+                      className="block rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/60"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold tracking-wider text-navy-900 dark:text-white ltr">

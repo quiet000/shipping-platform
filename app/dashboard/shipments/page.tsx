@@ -173,7 +173,7 @@ export default function ShipmentsPage() {
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
                 <th className="px-4 py-3 font-semibold">البوليصة</th>
                 <th className="px-4 py-3 font-semibold">العميل</th>
                 <th className="px-4 py-3 font-semibold">المدينة</th>
@@ -190,7 +190,7 @@ export default function ShipmentsPage() {
                 return (
                   <tr
                     key={s.id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
@@ -258,7 +258,7 @@ export default function ShipmentsPage() {
                             onClick={() => setEditId(s.id)}
                             title="تعديل بيانات الشحنة"
                           >
-                            <Pencil className="h-4 w-4 text-blue-600" />
+                            <Pencil className="h-4 w-4 text-sky-600" />
                           </Button>
                         )}
                         <Button variant="ghost" size="icon" onClick={() => setViewId(s.id)} title="عرض التفاصيل">

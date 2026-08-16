@@ -129,7 +129,7 @@ export default function DashboardPage() {
           title="إجمالي الشحنات"
           value={loadingStats ? "..." : stats?.total ?? 0}
           icon={Package}
-          color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+          color="bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400"
           delay={0}
         />
         <KpiCard
@@ -144,7 +144,7 @@ export default function DashboardPage() {
           value={loadingStats ? "..." : stats?.pending ?? 0}
           sub={`${stats?.outForDelivery ?? 0} خرجت للتوصيل`}
           icon={Clock4}
-          color="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400"
+          color="bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400"
           delay={0.12}
         />
         <KpiCard
@@ -281,7 +281,7 @@ export default function DashboardPage() {
             </div>
 
             {agencyData.length > 0 && (
-              <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+              <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-700">
                 {agencyData.map((a) => (
                   <div
                     key={a.name}
@@ -318,7 +318,7 @@ export default function DashboardPage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">البوليصة</th>
                 <th className="pb-3 font-semibold">العميل</th>
                 <th className="pb-3 font-semibold">المدينة</th>
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               {recent.map((s: Shipment) => (
                 <tr
                   key={s.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2 font-bold tracking-wider text-navy-900 dark:text-white ltr">
                     {s.waybill_number}

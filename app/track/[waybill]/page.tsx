@@ -47,11 +47,11 @@ export default function TrackPage() {
   }, [waybill]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900 dark:bg-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900 dark:bg-sky-600">
               <TruckIcon className="h-5 w-5 text-accent" />
             </div>
             <span className="font-black text-navy-900 dark:text-white">شحن إكسبريس</span>
@@ -70,7 +70,7 @@ export default function TrackPage() {
           </h1>
           <p className="mt-2 flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             رقم البوليصة:
-            <span className="font-black tracking-wider text-blue-600 dark:text-blue-400 ltr">
+            <span className="font-black tracking-wider text-sky-600 dark:text-sky-400 ltr">
               {waybill}
             </span>
           </p>
@@ -110,7 +110,7 @@ export default function TrackPage() {
               </div>
               <div className="grid gap-4 p-5 sm:grid-cols-3">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   <div>
                     <p className="text-xs text-slate-400">مدينة الوجهة</p>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
@@ -134,7 +134,7 @@ export default function TrackPage() {
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
                       {formatDate(shipment.expected_delivery_date)}
                       {daysUntil(shipment.expected_delivery_date) >= 0 && (
-                        <span className="mr-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        <span className="mr-2 text-xs font-semibold text-sky-600 dark:text-sky-400">
                           (بعد {daysUntil(shipment.expected_delivery_date)} يوم)
                         </span>
                       )}

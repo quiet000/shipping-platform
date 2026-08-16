@@ -158,7 +158,7 @@ export default function UsersPage() {
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+              <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
                 <th className="px-4 py-3 font-semibold">الموظف</th>
                 <th className="px-4 py-3 font-semibold">الدور</th>
                 <th className="px-4 py-3 font-semibold">الحالة</th>
@@ -169,11 +169,11 @@ export default function UsersPage() {
               {profiles.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-xs font-black text-white dark:bg-blue-600">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-xs font-black text-white dark:bg-sky-600">
                         {p.full_name.charAt(0)}
                       </div>
                       <div>
@@ -199,7 +199,7 @@ export default function UsersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${p.is_active ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"}`}>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${p.is_active ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${p.is_active ? "bg-green-500" : "bg-red-500"}`} />
                       {p.is_active ? "نشط" : "موقوف"}
                     </span>
@@ -376,11 +376,11 @@ function ResetPasswordModal({
             required
           />
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
           عند الحفظ تُبطَل الجلسات المفتوحة للموظف فوراً، وتنتهي صلاحية كلمة المرور القديمة. تأكد من
           تسليمه الكلمة الجديدة بالضبط (انقر «نسخ» إن أردت).
         </div>
-        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             إلغاء
           </Button>
@@ -515,10 +515,10 @@ function UserModal({
         {form.role !== "admin" && (
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <ShieldCheck className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               <Label className="mb-0">الصلاحيات المخصصة</Label>
             </div>
-            <div className="grid gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-2 dark:border-slate-800">
+            <div className="grid gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-2 dark:border-slate-700">
               {PERMISSION_OPTIONS.map((opt) => {
                 const checked = perms[opt.key] === true;
                 return (
@@ -526,13 +526,13 @@ function UserModal({
                     key={opt.key}
                     className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
                       checked
-                        ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-500/10 dark:text-blue-300"
+                        ? "border-sky-500 bg-sky-50 text-sky-700 dark:border-sky-500 dark:bg-sky-500/10 dark:text-sky-300"
                         : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     }`}
                   >
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 accent-blue-600"
+                      className="h-4 w-4 rounded border-slate-300 accent-sky-600"
                       checked={checked}
                       onChange={() => togglePerm(opt.key)}
                     />
@@ -544,7 +544,7 @@ function UserModal({
           </div>
         )}
 
-        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             إلغاء
           </Button>

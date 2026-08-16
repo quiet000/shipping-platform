@@ -14,9 +14,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-sky-600 dark:text-sky-400" />
           <p className="text-sm text-slate-500 dark:text-slate-400">جارٍ التحميل...</p>
         </div>
       </div>
@@ -29,7 +29,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="lg:mr-64">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />

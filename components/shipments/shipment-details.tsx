@@ -126,7 +126,7 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
         </div>
 
         {can("shipments.update.status") && (
-          <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+          <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
             <p className="mb-3 text-sm font-black text-slate-700 dark:text-slate-200">
               تحديث الحالة
             </p>
@@ -147,7 +147,7 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+        <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
           <p className="mb-3 text-sm font-black text-slate-700 dark:text-slate-200">سجل حركة الشحنة</p>
           <div className="space-y-4">
             {logs.length === 0 && (
@@ -155,7 +155,7 @@ export function ShipmentDetailsDrawer({ shipmentId, onClose, onChanged }: Props)
             )}
             {logs.map((log) => (
               <div key={log.id} className="relative flex gap-3 pr-4">
-                <span className="absolute right-0 top-1.5 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                <span className="absolute right-0 top-1.5 h-2.5 w-2.5 rounded-full bg-sky-500" />
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-bold text-slate-700 dark:text-slate-200">

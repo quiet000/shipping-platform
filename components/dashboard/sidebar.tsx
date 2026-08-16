@@ -70,13 +70,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-64 flex-col border-l border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0",
+          "fixed inset-y-0 right-0 z-50 flex w-64 flex-col border-l border-slate-200 bg-white transition-transform duration-300 dark:border-slate-700 dark:bg-slate-800 lg:translate-x-0",
           open ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
+        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-700">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900 dark:bg-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900 dark:bg-sky-600">
               <Package className="h-5 w-5 text-sky-300" />
             </div>
             <div>
@@ -114,7 +114,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition",
                           active
-                            ? "bg-navy-900 text-white dark:bg-blue-600"
+                            ? "bg-navy-900 text-white dark:bg-sky-600"
                             : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                         )}
                       >
@@ -129,9 +129,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-3 dark:border-slate-800">
+        <div className="border-t border-slate-200 p-3 dark:border-slate-700">
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-sm font-black text-white dark:bg-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-sm font-black text-white dark:bg-sky-600">
               {user?.full_name?.charAt(0) ?? "م"}
             </div>
             <div className="min-w-0 flex-1">

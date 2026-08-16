@@ -70,7 +70,7 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+    <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
       <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${color}`}>
         <Icon className="h-5 w-5" />
       </div>
@@ -83,9 +83,9 @@ function SummaryCard({
 }
 
 const PERMISSION_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
-  approved: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400",
-  rejected: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+  pending: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
+  approved: "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400",
+  rejected: "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400",
 };
 
 export default function AttendancePage() {
@@ -239,7 +239,7 @@ export default function AttendancePage() {
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-bold ${
                     today.status === "present"
-                      ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                      ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
                   }`}
                 >
@@ -278,7 +278,7 @@ export default function AttendancePage() {
                   </Button>
                 )}
                 {pendingToday && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-bold text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400">
+                  <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                     <Clock4 className="h-4 w-4" />
                     طلب الإذن قيد المراجعة
                   </span>
@@ -288,7 +288,7 @@ export default function AttendancePage() {
           ) : (
             <div className="flex flex-col items-center gap-4 py-6 text-center">
               {pendingToday ? (
-                <div className="flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400">
+                <div className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                   <Clock4 className="h-4 w-4" />
                   لديك طلب إذن قيد مراجعة الإدارة — لا يمكنك تسجيل الحضور حتى صدور القرار
                 </div>
@@ -327,7 +327,7 @@ export default function AttendancePage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryCard title="أيام الحضور" value={myPresent} icon={CalendarCheck} color="bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400" />
         <SummaryCard title="أيام الإذن المعتمدة" value={myPermission} icon={ClipboardList} color="bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400" />
-        <SummaryCard title="إجمالي الساعات" value={formatHours(myHours)} icon={Timer} color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400" />
+        <SummaryCard title="إجمالي الساعات" value={formatHours(myHours)} icon={Timer} color="bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400" />
         <SummaryCard title="أيام الشهر المسجلة" value={myMonth.length} icon={CalendarDays} color="bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400" />
       </div>
 
@@ -342,7 +342,7 @@ export default function AttendancePage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">التاريخ</th>
                 <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
                 <th className="pb-3 font-semibold">المدة</th>
@@ -355,7 +355,7 @@ export default function AttendancePage() {
               {myRequests.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
                   <td className="py-3 pr-2 text-slate-600 dark:text-slate-300">{formatDate(r.date)}</td>
                   <td className="py-3 text-slate-600 dark:text-slate-300 ltr">
@@ -408,7 +408,7 @@ export default function AttendancePage() {
               <UserCheck className="h-5 w-5 text-accent" />
               طلبات الإذن المعلّقة — بانتظار قرارك
               {pendingRequests.length > 0 && (
-                <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:bg-red-500/15 dark:text-red-400">
+                <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-600 dark:bg-red-500/15 dark:text-red-400">
                   {pendingRequests.length}
                 </span>
               )}
@@ -417,7 +417,7 @@ export default function AttendancePage() {
           <CardContent className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                   <th className="pb-3 pr-2 font-semibold">الموظف</th>
                   <th className="pb-3 font-semibold">التاريخ</th>
                   <th className="pb-3 font-semibold">وقت الخروج المتوقع</th>
@@ -430,7 +430,7 @@ export default function AttendancePage() {
                 {pendingRequests.map((r) => (
                   <tr
                     key={r.id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                   >
                     <td className="py-3 pr-2">
                       <div className="flex flex-col gap-1">
@@ -454,7 +454,7 @@ export default function AttendancePage() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-500 hover:bg-green-600"
                           onClick={() => review.mutate({ id: r.id, status: "approved" })}
                           loading={review.isPending}
                         >
@@ -500,7 +500,7 @@ export default function AttendancePage() {
           <CardContent className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                   <th className="pb-3 pr-2 font-semibold">الموظف</th>
                   <th className="pb-3 font-semibold">أيام الحضور</th>
                   <th className="pb-3 font-semibold">أيام الإذن</th>
@@ -513,7 +513,7 @@ export default function AttendancePage() {
                 {report.map((r) => (
                   <tr
                     key={r.employee_id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                   >
                     <td className="py-3 pr-2">
                       <div className="flex flex-col gap-1">
@@ -589,7 +589,7 @@ export default function AttendancePage() {
                   className={cn(
                     "rounded-lg border px-3 py-2 text-sm font-semibold transition",
                     reqDuration === d
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-500/15 dark:text-blue-300"
+                      ? "border-sky-500 bg-sky-50 text-sky-700 dark:border-sky-500 dark:bg-sky-500/15 dark:text-sky-300"
                       : "border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300"
                   )}
                 >
@@ -607,7 +607,7 @@ export default function AttendancePage() {
               placeholder="سبب الإذن..."
             />
           </div>
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
             <Button type="button" variant="outline" onClick={() => setReqOpen(false)}>
               إلغاء
             </Button>

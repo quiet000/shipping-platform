@@ -72,19 +72,19 @@ export function NotificationsBell() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:w-96">
-          <div className="flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-800">
+        <div className="absolute left-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 sm:w-96">
+          <div className="flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-black text-slate-800 dark:text-white">التنبيهات</h3>
               {urgent > 0 && (
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-500/15 dark:text-red-400">
+                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-500/15 dark:text-red-400">
                   {urgent} عاجلة
                 </span>
               )}
             </div>
             <button
               onClick={markAll}
-              className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+              className="flex items-center gap-1 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
             >
               <CheckCheck className="h-3.5 w-3.5" />
               تحديد الكل كمقروء
@@ -105,8 +105,8 @@ export function NotificationsBell() {
                     }
                   }}
                   className={cn(
-                    "flex w-full items-start gap-3 border-b border-slate-100 p-3 text-right transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800",
-                    !n.is_read && "bg-blue-50/60 dark:bg-blue-500/5"
+                    "flex w-full items-start gap-3 border-b border-slate-100 p-3 text-right transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800",
+                    !n.is_read && "bg-sky-50/60 dark:bg-sky-500/5"
                   )}
                 >
                   {n.alert_type === "urgent" ? (
@@ -120,7 +120,7 @@ export function NotificationsBell() {
                       {n.message}
                     </p>
                     {n.title === PERMISSION_NOTIFICATION_TITLE && (
-                      <p className="mt-1 text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                      <p className="mt-1 text-[10px] font-bold text-sky-600 dark:text-sky-400">
                         اضغط للانتقال إلى الطلب المعلّق
                       </p>
                     )}
@@ -131,7 +131,7 @@ export function NotificationsBell() {
             )}
           </div>
 
-          <div className="border-t border-slate-200 p-2 dark:border-slate-800">
+          <div className="border-t border-slate-200 p-2 dark:border-slate-700">
             <Link href="/dashboard/notifications" onClick={() => setOpen(false)}>
               <Button variant="ghost" size="sm" className="w-full">
                 عرض جميع التنبيهات

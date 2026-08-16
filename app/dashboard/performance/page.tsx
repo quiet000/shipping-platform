@@ -74,7 +74,7 @@ export default function PerformancePage() {
           value={isLoading ? "..." : employees}
           sub={`${staff} موظف آخر`}
           icon={Users}
-          color="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+          color="bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400"
         />
         <KpiCard
           title="إجمالي الشحنات"
@@ -118,7 +118,7 @@ export default function PerformancePage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full min-w-[1000px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-right text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 <th className="pb-3 pr-2 font-semibold">الموظف</th>
                 <th className="pb-3 font-semibold">أيام العمل</th>
                 <th className="pb-3 font-semibold">الشحنات</th>
@@ -138,7 +138,7 @@ export default function PerformancePage() {
                 return (
                   <tr
                     key={r.id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                   >
                     <td className="py-3 pr-2">
                       <div className="flex flex-col gap-1">
@@ -152,14 +152,14 @@ export default function PerformancePage() {
                     <td className="py-3 font-semibold text-slate-700 dark:text-slate-200">{r.total}</td>
                     <td className="py-3 font-semibold text-green-600 dark:text-green-400">{r.delivered}</td>
                     <td className="py-3 font-semibold text-red-600 dark:text-red-400">{r.returned}</td>
-                    <td className="py-3 text-yellow-600 dark:text-yellow-400">{r.pending}</td>
+                    <td className="py-3 text-amber-600 dark:text-amber-400">{r.pending}</td>
                     <td className="py-3">
                       <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {closed > 0 ? `${rate}%` : "—"}
                       </span>
                     </td>
                     <td className="py-3 text-slate-600 dark:text-slate-300">{formatCurrency(r.expected_revenue)}</td>
-                    <td className="py-3 font-bold text-green-700 dark:text-green-300">
+                    <td className="py-3 font-bold text-green-600 dark:text-green-300">
                       {formatCurrency(r.collected_revenue)}
                     </td>
                     <td className="py-3 text-red-600 dark:text-red-400">{formatCurrency(r.lost_revenue)}</td>

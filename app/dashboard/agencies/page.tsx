@@ -106,7 +106,7 @@ export default function AgenciesPage() {
             <CardContent className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 dark:bg-blue-600 dark:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 dark:bg-sky-600 dark:text-white">
                     <Building2 className="h-6 w-6" />
                   </div>
                   <div>
@@ -118,7 +118,7 @@ export default function AgenciesPage() {
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" onClick={() => setDrawerId(a.id)} title="عرض الإحصائيات">
-                    <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                   </Button>
                   {isAdmin && (
                     <>
@@ -167,7 +167,7 @@ export default function AgenciesPage() {
                 )}
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-700">
                 <span className="text-[11px] text-slate-400">
                   انضم في {formatDate(a.created_at)}
                 </span>
@@ -282,7 +282,7 @@ function AgencyModal({
             تُحسب العمولة تلقائياً من إجمالي المبالغ المحصلة.
           </p>
         </div>
-        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             إلغاء
           </Button>
@@ -315,9 +315,9 @@ function AgencyStatsDrawer({
   });
 
   const items = [
-    { icon: Package, label: "إجمالي الأوردرات", value: stats?.total ?? 0, color: "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400" },
+    { icon: Package, label: "إجمالي الأوردرات", value: stats?.total ?? 0, color: "bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400" },
     { icon: PackageCheck, label: "تم التسليم", value: stats?.delivered ?? 0, color: "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400" },
-    { icon: Clock4, label: "قيد المعالجة", value: stats?.pending ?? 0, color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400" },
+    { icon: Clock4, label: "قيد المعالجة", value: stats?.pending ?? 0, color: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400" },
     { icon: RotateCcw, label: "مرتجعات", value: stats?.returned ?? 0, color: "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" },
     { icon: Package, label: "إجمالي قيمة الطلبات", value: formatCurrency(stats?.totalValue ?? 0), color: "bg-slate-100 text-slate-600 dark:bg-slate-500/15 dark:text-slate-300" },
     { icon: Wallet, label: "المبالغ المحصلة", value: formatCurrency(stats?.collected ?? 0), color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400" },
@@ -339,7 +339,7 @@ function AgencyStatsDrawer({
 
         <div className="grid grid-cols-2 gap-3">
           {items.map((x) => (
-            <div key={x.label} className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+            <div key={x.label} className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
               <div className={`mb-2 flex h-9 w-9 items-center justify-center rounded-lg ${x.color}`}>
                 <x.icon className="h-4.5 w-4.5" />
               </div>

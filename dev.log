@@ -1,0 +1,126 @@
+
+> logistics-platform@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.22
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.4:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.1s
+ ○ Compiling /login ...
+ ✓ Compiled /login in 3s (849 modules)
+ GET /login 200 in 3495ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 3.4s (1958 modules)
+ GET /dashboard 200 in 3953ms
+ ○ Compiling /dashboard/users ...
+ ✓ Compiled /dashboard/users in 513ms (1967 modules)
+ GET /dashboard/users 200 in 862ms
+ ○ Compiling /dashboard/shipments ...
+ ✓ Compiled /dashboard/shipments in 680ms (2018 modules)
+ GET /dashboard/shipments 200 in 970ms
+ ○ Compiling /api/users ...
+ ✓ Compiled /api/users in 672ms (2081 modules)
+ POST /api/users 200 in 1775ms
+ ✓ Compiled /api/users/reset-password in 443ms (2083 modules)
+ POST /api/users/reset-password 200 in 1004ms
+ GET /dashboard 200 in 340ms
+ GET /login 200 in 73ms
+ GET /login 200 in 28ms
+ GET /login 200 in 25ms
+ GET /dashboard 200 in 27ms
+ GET /dashboard/shipments 200 in 38ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1074ms (2024 modules)
+ GET / 200 in 1273ms
+ GET /dashboard 200 in 250ms
+ ○ Compiling /dashboard/notifications ...
+ ✓ Compiled /dashboard/notifications in 917ms (2035 modules)
+ GET /dashboard/notifications 200 in 1039ms
+ ✓ Compiled /dashboard/users in 256ms (1099 modules)
+ GET /dashboard/users 200 in 348ms
+ GET /login 200 in 37ms
+ GET /login 200 in 24ms
+ GET /login 200 in 23ms
+ ○ Compiling /track/[waybill] ...
+ ✓ Compiled /track/[waybill] in 744ms (2050 modules)
+ GET /track/SHP-203944 200 in 1663ms
+ ✓ Compiled / in 205ms (1104 modules)
+ GET / 200 in 305ms
+ GET /track/SHP-203944 200 in 35ms
+ GET /login 200 in 30ms
+ GET /dashboard 200 in 38ms
+ GET /dashboard/shipments 200 in 49ms
+ GET / 200 in 22ms
+ GET /track/SHP-903311 200 in 28ms
+ GET /track/SHP-203944 200 in 30ms
+ GET /track/SHP-199005 200 in 34ms
+ GET /track/SHP-903311 200 in 30ms
+ GET / 200 in 20ms
+ GET /track/SHP-199005 200 in 30ms
+ GET / 200 in 21ms
+ GET /track/SHP-203944 200 in 30ms
+ GET / 200 in 21ms
+ GET /login 200 in 22ms
+ GET /dashboard 200 in 24ms
+ GET /dashboard/users 200 in 36ms
+ ○ Compiling /dashboard/drivers ...
+ ✓ Compiled /dashboard/drivers in 1152ms (2070 modules)
+ GET /dashboard/drivers 200 in 1273ms
+ GET /dashboard/users 200 in 41ms
+ GET / 200 in 35ms
+ GET /track/SHP-203944 200 in 45ms
+ GET / 200 in 22ms
+ GET /track/SHP-903311 200 in 35ms
+ GET / 200 in 23ms
+ GET /login 200 in 34ms
+ GET /dashboard 200 in 39ms
+ ✓ Compiled /dashboard/notifications in 448ms (1096 modules)
+ GET /dashboard/notifications 200 in 576ms
+ ✓ Compiled /dashboard/shipments in 382ms (1106 modules)
+ GET /dashboard/shipments 200 in 466ms
+ ○ Compiling /dashboard/agencies ...
+ ✓ Compiled /dashboard/agencies in 1569ms (1563 modules)
+ GET /dashboard/agencies 200 in 1725ms
+ GET /login 200 in 192ms
+ GET /dashboard/agencies 200 in 41ms
+ GET /dashboard/agencies 200 in 44ms
+ GET /dashboard/users 200 in 42ms
+ ○ Compiling /api/users ...
+ ✓ Compiled /api/users in 508ms (639 modules)
+ POST /api/users 200 in 1295ms
+ ✓ Compiled /dashboard/drivers in 212ms (646 modules)
+ GET /dashboard/drivers 200 in 335ms
+ ○ Compiling /dashboard/trucks ...
+ ✓ Compiled /dashboard/trucks in 954ms (1636 modules)
+ GET /dashboard/trucks 200 in 1094ms
+ GET /login 200 in 132ms
+ GET /dashboard/trucks 200 in 35ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 937ms (1099 modules)
+ GET /dashboard 200 in 1169ms
+ ✓ Compiled /dashboard/notifications in 218ms (1084 modules)
+ GET /dashboard/notifications 200 in 353ms
+ ✓ Compiled /dashboard/shipments in 205ms (1097 modules)
+ GET /dashboard/shipments 200 in 286ms
+ GET /dashboard/notifications 200 in 43ms
+ GET /login 200 in 70ms
+ GET /login 200 in 27ms
+ GET /login 200 in 22ms
+ GET /login 200 in 192ms
+ ○ Compiling / ...
+ ✓ Compiled / in 607ms (1097 modules)
+ GET / 200 in 726ms
+ GET /login 200 in 400ms
+ GET /login 200 in 70ms
+ GET /dashboard 200 in 54ms
+ GET /dashboard/shipments 200 in 43ms
+ GET /login 200 in 28ms
+ GET /login 200 in 31ms
+ GET /login 200 in 30ms
+ GET / 200 in 24ms
+ ○ Compiling /track/[waybill] ...
+ ✓ Compiled /track/[waybill] in 812ms (1101 modules)
+ GET /track/SHP-918356 200 in 913ms

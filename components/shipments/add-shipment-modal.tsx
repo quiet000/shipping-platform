@@ -265,7 +265,7 @@ export function AddShipmentModal({ open, onClose }: Props) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             إلغاء
           </Button>

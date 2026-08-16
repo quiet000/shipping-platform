@@ -29,12 +29,13 @@ const config: Config = {
         accent: {
           DEFAULT: "#0369A1",
           light: "#0ea5e9",
+          soft: "#38BDF8",
           dark: "#075985",
         },
-        success: "#16a34a",
+        success: "#22C55E",
         warning: "#f59e0b",
-        danger: "#dc2626",
-        info: "#2563EB",
+        danger: "#EF4444",
+        info: "#0EA5E9",
       },
       boxShadow: {
         card: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",

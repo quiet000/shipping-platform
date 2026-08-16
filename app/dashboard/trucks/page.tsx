@@ -92,7 +92,7 @@ export default function TrucksPage() {
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 dark:bg-blue-600 dark:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900 text-sky-300 dark:bg-sky-600 dark:text-white">
                     <Truck className="h-6 w-6" />
                   </div>
                   <div>
@@ -138,13 +138,13 @@ export default function TrucksPage() {
                 </p>
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-700">
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                     t.status === "active"
-                      ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                      ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400"
                       : t.status === "maintenance"
-                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400"
+                      ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
                       : "bg-slate-100 text-slate-600 dark:bg-slate-500/15 dark:text-slate-400"
                   }`}
                 >
@@ -252,7 +252,7 @@ function TruckForm({
           ))}
         </Select>
       </div>
-      <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+      <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
         <Button type="button" variant="outline" onClick={onCancel}>
           إلغاء
         </Button>

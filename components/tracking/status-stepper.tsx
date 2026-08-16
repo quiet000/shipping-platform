@@ -23,7 +23,7 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
     return (
       <div className="flex flex-col items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950/40">
         <RotateCcw className="h-10 w-10 text-red-500" />
-        <p className="font-bold text-red-700 dark:text-red-300">تم إرجاع الشحنة</p>
+        <p className="font-bold text-red-600 dark:text-red-300">تم إرجاع الشحنة</p>
         <p className="text-sm text-red-600 dark:text-red-400">
           تعذّر تسليم هذه الشحنة وتم إرجاعها إلى المخزن.
         </p>
@@ -33,10 +33,10 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
 
   if (status === "delayed") {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-6 text-center dark:border-orange-800 dark:bg-orange-950/40">
-        <AlertTriangle className="h-10 w-10 text-orange-500" />
-        <p className="font-bold text-orange-700 dark:text-orange-300">الشحنة متأخرة</p>
-        <p className="text-sm text-orange-600 dark:text-orange-400">
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800 dark:bg-amber-950/40">
+        <AlertTriangle className="h-10 w-10 text-amber-500" />
+        <p className="font-bold text-amber-700 dark:text-amber-300">الشحنة متأخرة</p>
+        <p className="text-sm text-amber-600 dark:text-amber-400">
           يوجد تأخير في تسليم هذه الشحنة ونعمل على حلّه بأسرع وقت.
         </p>
       </div>
@@ -50,7 +50,7 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
       <div className="relative flex items-center justify-between">
         <div className="absolute top-5 right-5 left-5 h-0.5 bg-slate-200 dark:bg-slate-700">
           <div
-            className="h-0.5 bg-blue-600 transition-all duration-700 dark:bg-blue-500"
+            className="h-0.5 bg-sky-600 transition-all duration-700 dark:bg-sky-500"
             style={{
               width: currentIndex >= 0 ? `${(currentIndex / (steps.length - 1)) * 100}%` : "0%",
               marginRight: "auto",
@@ -67,9 +67,9 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-full border-2 transition",
                   done
-                    ? "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500"
+                    ? "border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500"
                     : "border-slate-300 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800",
-                  isCurrent && "ring-4 ring-blue-500/20"
+                  isCurrent && "ring-4 ring-sky-500/20"
                 )}
               >
                 {done ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
@@ -77,7 +77,7 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
               <span
                 className={cn(
                   "text-xs font-semibold sm:text-sm",
-                  done ? "text-blue-700 dark:text-blue-400" : "text-slate-500 dark:text-slate-400"
+                  done ? "text-sky-700 dark:text-sky-400" : "text-slate-500 dark:text-slate-400"
                 )}
               >
                 {STATUS_LABELS[step]}
@@ -98,7 +98,7 @@ export function StatusStepper({ shipment, logs }: { shipment: Shipment; logs: Sh
                 className={cn(
                   "relative mt-1.5 h-4 w-4 flex-shrink-0 rounded-full border-4",
                   idx === 0
-                    ? "border-blue-500 bg-blue-100 dark:bg-blue-900"
+                    ? "border-sky-500 bg-sky-100 dark:bg-sky-900"
                     : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800"
                 )}
               />
