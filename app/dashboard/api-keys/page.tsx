@@ -156,47 +156,141 @@ export default function ApiKeysPage() {
         </Button>
       </div>
 
-      {/* Endpoint info */}
+      {/* Endpoint info + cURL examples */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Webhook className="h-5 w-5 text-accent" />
-            نقطة الاتصال (Endpoint)
+            نقاط الاتصال والأكواد الجاهزة
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
+        <CardContent className="space-y-4 text-sm">
           <div className="flex flex-wrap gap-4">
             <div className="rounded-lg bg-slate-100 px-4 py-2 dark:bg-slate-800">
-              <span className="text-xs text-slate-500 dark:text-slate-400">POST — إضافة شحنة</span>
-              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-                /api/webhooks/shipments
-              </code>
+              <span className="text-xs text-slate-500 dark:text-slate-400">POST</span>
+              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">/api/webhooks/shipments</code>
             </div>
             <div className="rounded-lg bg-slate-100 px-4 py-2 dark:bg-slate-800">
-              <span className="text-xs text-slate-500 dark:text-slate-400">GET — قراءة الشحنات</span>
-              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-                /api/webhooks/shipments?limit=50
-              </code>
+              <span className="text-xs text-slate-500 dark:text-slate-400">GET</span>
+              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">/api/webhooks/shipments?limit=50</code>
             </div>
           </div>
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-900">
-            <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">مثال على طلب n8n:</p>
-            <pre className="overflow-x-auto text-[11px] text-slate-700 dark:text-slate-300">{`POST /api/webhooks/shipments
-Authorization: Bearer whk_live_xxxxxxxxxxxx
-Content-Type: application/json
 
-{
-  "client_name": "أحمد محمد",
-  "client_phone": "01012345678",
-  "destination_address": "شارع النصر، المعادي",
-  "destination_city": "القاهرة",
-  "shipping_type": "standard",
-  "price": 50,
-  "cod_amount": 200
-}`}</pre>
+          {/* POST cURL */}
+          <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-green-400">POST — إضافة شحنة</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-slate-400 hover:text-white"
+                onClick={() => {
+                  const el = document.getElementById("curl-post");
+                  if (el) navigator.clipboard.writeText(el.textContent ?? "");
+                  setCopiedId("curl-post");
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+              >
+                {copiedId === "curl-post" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-post" ? "تم النسخ" : "نسخ"}
+              </Button>
+            </div>
+            <pre
+              id="curl-post"
+              className="overflow-x-auto text-[11px] leading-relaxed text-green-300"
+              dir="ltr"
+            >
+{`curl -X POST https://YOUR-DOMAIN.com/api/webhooks/shipments \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "client_name": "أحمد محمد",
+    "client_phone": "01012345678",
+    "destination_address": "شارع النصر، المعادي",
+    "destination_city": "القاهرة",
+    "shipping_type": "standard",
+    "price": 50,
+    "cod_amount": 200,
+    "is_fragile": false
+  }'`}</pre>
           </div>
+
+          {/* POST cURL — bulk */}
+          <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-green-400">POST — إضافة شحنات متعددة</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-slate-400 hover:text-white"
+                onClick={() => {
+                  const el = document.getElementById("curl-bulk");
+                  if (el) navigator.clipboard.writeText(el.textContent ?? "");
+                  setCopiedId("curl-bulk");
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+              >
+                {copiedId === "curl-bulk" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-bulk" ? "تم النسخ" : "نسخ"}
+              </Button>
+            </div>
+            <pre
+              id="curl-bulk"
+              className="overflow-x-auto text-[11px] leading-relaxed text-green-300"
+              dir="ltr"
+            >
+{`curl -X POST https://YOUR-DOMAIN.com/api/webhooks/shipments \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" \\
+  -H "Content-Type: application/json" \\
+  -d '[
+    {
+      "client_name": "أحمد محمد",
+      "client_phone": "01012345678",
+      "destination_city": "القاهرة",
+      "price": 50,
+      "cod_amount": 200
+    },
+    {
+      "client_name": "سارة علي",
+      "client_phone": "01112345678",
+      "destination_city": "الإسكندرية",
+      "shipping_type": "express",
+      "price": 75
+    }
+  ]'`}</pre>
+          </div>
+
+          {/* GET cURL */}
+          <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-blue-400">GET — قراءة شحنات الوكالة</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-slate-400 hover:text-white"
+                onClick={() => {
+                  const el = document.getElementById("curl-get");
+                  if (el) navigator.clipboard.writeText(el.textContent ?? "");
+                  setCopiedId("curl-get");
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+              >
+                {copiedId === "curl-get" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-get" ? "تم النسخ" : "نسخ"}
+              </Button>
+            </div>
+            <pre
+              id="curl-get"
+              className="overflow-x-auto text-[11px] leading-relaxed text-blue-300"
+              dir="ltr"
+            >
+{`curl https://YOUR-DOMAIN.com/api/webhooks/shipments?limit=50 \\
+  -H "Authorization: Bearer whk_live_KEY_HERE"`}</pre>
+          </div>
+
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            ملاحظة: الـ agency_id تلقائي من المفتاح — لا تحتاج ترسله في الطلب
+            استبدل <code className="font-bold">YOUR-DOMAIN.com</code> بنطاق موقعك، و<code className="font-bold">whk_live_KEY_HERE</code> بالمفتاح اللي هتنشأه.
+            الـ agency_id تلقائي من المفتاح — لا تحتاج ترسله.
           </p>
         </CardContent>
       </Card>
