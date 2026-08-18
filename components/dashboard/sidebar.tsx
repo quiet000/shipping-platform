@@ -17,6 +17,7 @@ import {
   CalendarClock,
   History,
   FileBarChart,
+  Webhook,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
@@ -47,6 +48,12 @@ const navItems = [
       { href: "/dashboard/performance", label: "إحصائيات الموظفين", icon: BarChart3, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
       { href: "/dashboard/reports", label: "التقارير", icon: FileBarChart, roles: ["admin", "supervisor", "branch_manager", "accountant"] },
       { href: "/dashboard/trucks", label: "الأسطول والشاحنات", icon: Truck, roles: ["admin"] },
+    ],
+  },
+  {
+    section: "الربط الخارجي",
+    items: [
+      { href: "/dashboard/api-keys", label: "API & Webhooks", icon: Webhook, roles: ["admin"] },
     ],
   },
 ];

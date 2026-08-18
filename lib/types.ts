@@ -21,6 +21,21 @@ export interface Profile {
   created_at: string;
 }
 
+export type ApiKeyPermission = "shipments:create" | "shipments:read" | "shipments:update";
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key_prefix: string;
+  agency_id: string;
+  created_by: string;
+  is_active: boolean;
+  permissions: ApiKeyPermission[];
+  last_used_at: string | null;
+  created_at: string;
+  expires_at: string | null;
+}
+
 export interface Agency {
   id: string;
   name: string;

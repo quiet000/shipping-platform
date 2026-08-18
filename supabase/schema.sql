@@ -482,8 +482,31 @@ $$;
 -- SELECT cron.schedule('sla-alerts', '0 */6 * * *', 'SELECT generate_sla_alerts();');
 
 -- ============================================================
---  Indexes for hot query paths (attendance/permission/shipments)
+--  API Keys — token-based access for external integrations (n8n, etc.)
 -- ============================================================
+CREATE TABLE api_keys (
+  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name        text NOT NULL,                          -- human label: "n8n Production"
+  key_hash    text NOT NULL UNIQUE,                   -- SHA-256 of the full key
+  key_prefix  text NOT NULL,                          -- first 12 chars for display (whk_live_xxxx)
+  agency_id   uuid NOT NULL REFERENCES agencies(id) ON DELETE RESTRICT,
+  created_by  uuid NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
+  is_active   boolean NOT NULL DEFAULT true,
+  permissions text[] NOT NULL DEFAULT ARRAY['shipments:create'],
+  last_used_at timestamptz,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz
+);
+
+-- Admin can read all; everyone else no access (keys are not for users table)
+ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "api_keys_admin_all" ON api_keys
+  FOR ALL USING (public.current_user_role() = 'admin')
+  WITH CHECK (public.current_user_role() = 'admin');
+
+CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys (key_hash);
+CREATE INDEX IF NOT EXISTS idx_api_keys_agency ON api_keys (agency_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_employee_date ON attendance (employee_id, date);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance (date);
 CREATE INDEX IF NOT EXISTS idx_pr_employee ON permission_requests (employee_id);

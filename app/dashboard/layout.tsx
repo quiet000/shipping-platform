@@ -12,6 +12,7 @@ const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/users": ["admin"],
   "/dashboard/drivers": ["admin"],
   "/dashboard/trucks": ["admin"],
+  "/dashboard/api-keys": ["admin"],
   "/dashboard/performance": ["admin", "supervisor", "branch_manager", "accountant"],
   "/dashboard/reports": ["admin", "supervisor", "branch_manager", "accountant"],
   "/dashboard/agencies": ["admin", "supervisor", "branch_manager", "accountant"],
