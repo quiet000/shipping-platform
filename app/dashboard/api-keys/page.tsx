@@ -204,6 +204,7 @@ export default function ApiKeysPage() {
   -H "Authorization: Bearer whk_live_KEY_HERE" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "waybill_number": "SHP-123456",
     "client_name": "أحمد محمد",
     "client_phone": "01012345678",
     "destination_address": "شارع النصر، المعادي",
@@ -212,7 +213,8 @@ export default function ApiKeysPage() {
     "price": 50,
     "cod_amount": 200,
     "is_fragile": false
-  }'`}</pre>
+  }'
+# لو مش محتاج waybill_number امسح السطر ده — هيتولد تلقائي: SHP-XXXXXX`}</pre>
           </div>
 
           {/* POST cURL — bulk */}
@@ -244,6 +246,7 @@ export default function ApiKeysPage() {
   -H "Content-Type: application/json" \\
   -d '[
     {
+      "waybill_number": "SHP-111111",
       "client_name": "أحمد محمد",
       "client_phone": "01012345678",
       "destination_city": "القاهرة",
@@ -257,7 +260,8 @@ export default function ApiKeysPage() {
       "shipping_type": "express",
       "price": 75
     }
-  ]'`}</pre>
+  ]'
+# لو مش محتاج waybill_number امسح السطر ده — هيتولد تلقائي: SHP-XXXXXX`}</pre>
           </div>
 
           {/* GET cURL */}
@@ -290,6 +294,7 @@ export default function ApiKeysPage() {
 
           <p className="text-xs text-slate-400 dark:text-slate-500">
             استبدل <code className="font-bold">YOUR-DOMAIN.com</code> بنطاق موقعك، و<code className="font-bold">whk_live_KEY_HERE</code> بالمفتاح اللي هتنشأه.
+            لو مش محتاج تحدد رقم شحنة (<code className="font-bold">waybill_number</code>)، امسح السطر ده وهيتولد تلقائي.
             الـ agency_id تلقائي من المفتاح — لا تحتاج ترسله.
           </p>
         </CardContent>
