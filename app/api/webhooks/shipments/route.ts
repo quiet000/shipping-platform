@@ -107,7 +107,7 @@ export async function POST(request: Request) {
   });
 }
 
-// GET: list recent shipments created via this API key
+// GET: query shipments — filter by status, waybill_number, or list all
 export async function GET(request: Request) {
   if (!url || !serviceRoleKey) {
     return NextResponse.json({ error: "API not configured" }, { status: 500 });
@@ -128,14 +128,41 @@ export async function GET(request: Request) {
 
   const urlObj = new URL(request.url);
   const limit = Math.min(Number(urlObj.searchParams.get("limit")) || 50, 200);
+  const status = urlObj.searchParams.get("status")?.trim();
+  const waybill = urlObj.searchParams.get("waybill_number")?.trim();
 
-  const { data, error } = await admin
+  let query = admin
     .from("shipments")
-    .select("id, waybill_number, client_name, status, price, cod_amount, created_at")
-    .eq("agency_id", keyAuth.agency_id)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .select("id, waybill_number, client_name, client_phone, destination_city, status, shipping_type, price, cod_amount, expected_delivery_date, created_at, updated_at")
+    .eq("agency_id", keyAuth.agency_id);
 
+  if (waybill) {
+    query = query.ilike("waybill_number", waybill);
+  }
+  if (status) {
+    query = query.eq("status", status);
+  }
+
+  query = query.order("created_at", { ascending: false }).limit(limit);
+
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  const STATUS_AR: Record<string, string> = {
+    in_warehouse: "في المخزن",
+    out_for_delivery: "خرجت للتوصيل",
+    delivered: "تم التسليم",
+    returned: "مرتجع",
+    delayed: "متأخرة",
+  };
+
+  const result = (data ?? []).map((s) => ({
+    ...s,
+    status_ar: STATUS_AR[s.status] ?? s.status,
+  }));
+
+  return NextResponse.json({
+    count: result.length,
+    shipments: result,
+  });
 }

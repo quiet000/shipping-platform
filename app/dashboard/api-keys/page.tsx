@@ -172,7 +172,8 @@ export default function ApiKeysPage() {
             </div>
             <div className="rounded-lg bg-slate-100 px-4 py-2 dark:bg-slate-800">
               <span className="text-xs text-slate-500 dark:text-slate-400">GET</span>
-              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">/api/webhooks/shipments?limit=50</code>
+              <code className="mr-2 text-sm font-bold text-slate-800 dark:text-slate-200">/api/webhooks/shipments</code>
+              <span className="mr-2 text-[10px] text-slate-400">?status=delivered&waybill_number=SHP-123&limit=50</span>
             </div>
           </div>
 
@@ -264,32 +265,101 @@ export default function ApiKeysPage() {
 # لو مش محتاج waybill_number امسح السطر ده — هيتولد تلقائي: SHP-XXXXXX`}</pre>
           </div>
 
-          {/* GET cURL */}
+          {/* GET — all shipments */}
           <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold text-blue-400">GET — قراءة شحنات الوكالة</span>
+              <span className="text-xs font-bold text-blue-400">GET — كل شحنات الوكالة</span>
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-7 text-slate-400 hover:text-white"
                 onClick={() => {
-                  const el = document.getElementById("curl-get");
+                  const el = document.getElementById("curl-get-all");
                   if (el) navigator.clipboard.writeText(el.textContent ?? "");
-                  setCopiedId("curl-get");
+                  setCopiedId("curl-get-all");
                   setTimeout(() => setCopiedId(null), 2000);
                 }}
               >
-                {copiedId === "curl-get" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copiedId === "curl-get" ? "تم النسخ" : "نسخ"}
+                {copiedId === "curl-get-all" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-get-all" ? "تم النسخ" : "نسخ"}
               </Button>
             </div>
             <pre
-              id="curl-get"
+              id="curl-get-all"
               className="overflow-x-auto text-[11px] leading-relaxed text-blue-300"
               dir="ltr"
             >
-{`curl https://YOUR-DOMAIN.com/api/webhooks/shipments?limit=50 \\
-  -H "Authorization: Bearer whk_live_KEY_HERE"`}</pre>
+{`curl -s https://YOUR-DOMAIN.com/api/webhooks/shipments \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .`}</pre>
+          </div>
+
+          {/* GET — filter by status */}
+          <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-blue-400">GET — تصفية حسب الحالة</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-slate-400 hover:text-white"
+                onClick={() => {
+                  const el = document.getElementById("curl-get-status");
+                  if (el) navigator.clipboard.writeText(el.textContent ?? "");
+                  setCopiedId("curl-get-status");
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+              >
+                {copiedId === "curl-get-status" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-get-status" ? "تم النسخ" : "نسخ"}
+              </Button>
+            </div>
+            <pre
+              id="curl-get-status"
+              className="overflow-x-auto text-[11px] leading-relaxed text-blue-300"
+              dir="ltr"
+            >
+{`# في المخزن
+curl -s "https://YOUR-DOMAIN.com/api/webhooks/shipments?status=in_warehouse" \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .
+
+# خرجت للتوصيل
+curl -s "https://YOUR-DOMAIN.com/api/webhooks/shipments?status=out_for_delivery" \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .
+
+# تم التسليم
+curl -s "https://YOUR-DOMAIN.com/api/webhooks/shipments?status=delivered" \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .
+
+# المرتجعة
+curl -s "https://YOUR-DOMAIN.com/api/webhooks/shipments?status=returned" \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .`}</pre>
+          </div>
+
+          {/* GET — search by waybill */}
+          <div className="rounded-lg bg-slate-900 p-4 dark:bg-black">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-blue-400">GET — البحث برقم الشحنة</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-slate-400 hover:text-white"
+                onClick={() => {
+                  const el = document.getElementById("curl-get-waybill");
+                  if (el) navigator.clipboard.writeText(el.textContent ?? "");
+                  setCopiedId("curl-get-waybill");
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+              >
+                {copiedId === "curl-get-waybill" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedId === "curl-get-waybill" ? "تم النسخ" : "نسخ"}
+              </Button>
+            </div>
+            <pre
+              id="curl-get-waybill"
+              className="overflow-x-auto text-[11px] leading-relaxed text-blue-300"
+              dir="ltr"
+            >
+{`curl -s "https://YOUR-DOMAIN.com/api/webhooks/shipments?waybill_number=SHP-123456" \\
+  -H "Authorization: Bearer whk_live_KEY_HERE" | jq .`}</pre>
           </div>
 
           <p className="text-xs text-slate-400 dark:text-slate-500">
